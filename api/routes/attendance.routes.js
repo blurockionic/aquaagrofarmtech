@@ -1,5 +1,5 @@
 import express from "express";
-import { getAdvanceOrLoanReport, getAttendance, getAttendanceReport, getAttendanceReportById, markAttendance } from "../controllers/attendance.controller.js";
+import { getAdvanceOrLoanReport, getAttendance, getAttendanceById, getAttendanceReport, getAttendanceReportById, markAttendance } from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
@@ -18,5 +18,8 @@ router.get("/report/:id", getAttendanceReportById)
 
 //advance or loan
 router.get("/advance/:id", getAdvanceOrLoanReport)
+
+//endpoint for get attendance of specific employee
+router.get("/employee/:id", getAttendanceById)
 
 export default router

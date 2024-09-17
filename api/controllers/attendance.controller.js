@@ -28,7 +28,9 @@ export const markAttendance = async (req, res) => {
         advanceOrLoan,
         extraBonus,
       });
+
       await newAttendance.save();
+
       res.status(200).json(newAttendance);
     }
   } catch (error) {
@@ -238,6 +240,21 @@ export const getAdvanceOrLoanReport = async (req, res) => {
     }
 
     return res.status(200).json({ advance });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+//get attendance by id
+export const getAttendanceById = async (req, res) => {
+  const { id } = req.params;
+  console.log("id", id);
+  try {
+    const attendance = await Attendance.find({ employeeId: id });
+    if (!attendance) {
+      return res.status(404).json({ message: "Attendance not found" });
+    }
+    return res.status(200).json({ attendance });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

@@ -8,6 +8,7 @@ import { connectDatabase } from "./config/database.js";
 import authRoute  from "./routes/auth.routes.js"
 import employeeRoute  from "./routes/employee.routes.js"
 import attendanceRoute  from "./routes/attendance.routes.js"
+import advanceRoute  from "./routes/advance.routes.js"
 
 
 
@@ -48,3 +49,4 @@ const apiVersion = "/api/v1";
 app.use(`${apiVersion}/auth`, authRoute);
 app.use(`${apiVersion}/employee`, employeeRoute);
 app.use(`${apiVersion}/attendance`, attendanceRoute);
+app.use(`${apiVersion}/advance`, advanceRoute);

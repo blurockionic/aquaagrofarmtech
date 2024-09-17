@@ -21,8 +21,8 @@ const user = () => {
   const [attendanceStatus, setAttendanceStatus] = useState("present");
   const [currentDate, setCurrentDate] = useState(moment());
 
-  const [extraBonus, setExtraBonus] = useState<Number | null>(null);
-  const [advanceOrLoan, setAdvanceOrLoan] = useState<Number | null>(null);
+  const [extraBonus, setExtraBonus] = useState<Number>(0);
+  const [advanceOrLoan, setAdvanceOrLoan] = useState<Number>(0);
 
   const goToNextDay = () => {
     const nextDate = moment(currentDate).add(1, "days");
@@ -38,17 +38,29 @@ const user = () => {
     return date.format("MMMM D, YYYY");
   };
   const submitAttendance = async () => {
+    // const data = {
+    //   employeeId: params?.id,
+    //   employeeName: params?.name,
+    //   date: currentDate.format("MMMM D, YYYY"),
+    //   status: attendanceStatus,
+    //   extraBonus: extraBonus,
+    //   advanceOrLoan: advanceOrLoan,
+    // };
+    // console.log(data)
+    if (!advanceOrLoan || !extraBonus) {
+      Alert.alert("Please enter advance or loan amount");
+      return;
+    }
+    console.log(advanceOrLoan, extraBonus);
     try {
-      const attendanceData = {
+      const response = await axios.post(`${ApiUrl}/attendance/mark`, {
         employeeId: params?.id,
         employeeName: params?.name,
         date: currentDate.format("MMMM D, YYYY"),
         status: attendanceStatus,
-      };
-      const response = await axios.post(
-        `${ApiUrl}/attendance/mark`,
-        attendanceData
-      );
+        extraBonus: extraBonus,
+        advanceOrLoan: advanceOrLoan,
+      });
 
       if (response.status === 200) {
         Alert.alert(`Attendance submitted successfully for ${params?.name}`);
@@ -229,7 +241,7 @@ const user = () => {
             keyboardType="numeric" // Ensures numeric input only
             placeholderTextColor="black"
             placeholder="Advance / Loans"
-            value={advanceOrLoan !== null ? advanceOrLoan.toString() : ""}
+            value={advanceOrLoan}
             onChange={(e) => setAdvanceOrLoan(Number(e.nativeEvent.text))}
           />
           <TextInput
@@ -244,7 +256,7 @@ const user = () => {
             placeholderTextColor="black"
             placeholder="Extra Bonus"
             keyboardType="numeric" // Ensures numeric input only
-            value={extraBonus !== null ? extraBonus.toString() : ""}
+            value={extraBonus}
             onChange={(e) => setExtraBonus(Number(e.nativeEvent.text))}
           />
         </View>
