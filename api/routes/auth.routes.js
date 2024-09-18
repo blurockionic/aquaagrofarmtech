@@ -1,5 +1,5 @@
 import express from "express";
-import { login, logout, registration, updateDetails } from "../controllers/auth.controller.js";
+import { login, logout, registration, updateDetails, verifyEmail } from "../controllers/auth.controller.js";
 
 
 const router = express.Router();
@@ -17,6 +17,9 @@ router.put("/update", updateDetails)
 router.get("/logout", logout)
 
 router.get("/me/:id", logout)
+
+// endpoint for verify email
+router.post("/verify", verifyEmail)
 
 
 export default router

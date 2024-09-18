@@ -1,13 +1,52 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Icons } from "@/components/home/Icon";
 import { theme } from "@/constants/Colors";
+import * as Location from 'expo-location';
 
 type Props = {};
 
 const Home = (props: Props) => {
+  const [location, setLocation] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<any>(null);
+
+  useEffect(() => {
+    (async () => {
+      // Request permission to access location
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      // Get the current location and update in real-time
+      const subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 1000, // Update every second
+          distanceInterval: 1, // Update when user moves at least 1 meter
+        },
+        (loc) => {
+          setLocation(loc.coords);
+        }
+      );
+
+      // Clean up on component unmount
+      return () => subscription.remove();
+    })();
+  }, []);
+
+  let text = 'Waiting for location...';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = `Latitude: ${location.latitude}, Longitude: ${location.longitude}`;
+  }
+
+  console.log()
+
   return (
     <ScrollView>
       <LinearGradient colors={["#F9FAFB", "#ffffff"]} style={{ flex: 1 }}>

@@ -1,4 +1,3 @@
-
 import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
 import { Link, router } from "expo-router";
@@ -31,6 +30,22 @@ const SignUp = () => {
     if (!isLoaded) return;
 
     try {
+      try {
+        //check email added by owner or not
+        const response = await axios.post(`${ApiUrl}/auth/verify`, {
+          email: form.email,
+        });
+        console.log(response.data.message);
+        Alert.alert(response.data.message);
+      } catch (error: any) {
+        console.error(
+          "Error saving user data:",
+          error.response?.data?.message || error.message
+        );
+        Alert.alert(error.response?.data?.message);
+        return;
+      }
+      
       // Create the user and assign a role
       await signUp.create({
         emailAddress: form.email,
@@ -157,7 +172,7 @@ const SignUp = () => {
             onPress={onSignUpPress}
             className="mt-6"
           />
-          <OAuth />
+          {/* <OAuth /> */}
           <Link
             href="/sign-in"
             className="text-lg text-center text-general-200 mt-10"

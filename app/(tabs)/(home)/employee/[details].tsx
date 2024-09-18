@@ -547,71 +547,7 @@ const EmployeeDetails = (props: Props) => {
           {selectedTab === "Attendance" && (
             <>
               <AttendanceInCalender employeeId={employeeId} />
-              <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-10">
-                <Text className="text-md font-bold">Summary</Text>
-                <View style={{ marginHorizontal: 5 }}>
-                  {attendance?.map((item, index) => (
-                    <View key={index} style={{ marginVertical: 2 }}>
-                      <View
-                        style={{
-                          marginTop: 15,
-                          margin: 5,
-                          padding: 5,
-
-                          borderRadius: 5,
-                        }}
-                      >
-                        <View className="flex flex-row justify-between items-center w-full">
-                          <Text className="text-center  bg-green-200 text-lg px-6 py-4 rounded-md">
-                            {item?.present}
-                          </Text>
-                          <Text className="text-center  bg-red-300 text-lg px-6 py-4 rounded-md">
-                            {item?.absent}
-                          </Text>
-                          <Text className="text-center  bg-yellow-300 text-lg px-6 py-4 rounded-md">
-                            {item?.halfday}
-                          </Text>
-                        </View>
-                        <View className="flex flex-row items-center justify-end mt-4">
-                          <Ionicons
-                            name="information-circle-outline"
-                            size={20}
-                            color={"#6B7280"}
-                            className="text-gray-300"
-                          />
-                          <View className="flex flex-row justify-end items-center">
-                            <Text className="p-2 text-green-700 text-xs">
-                              Present
-                            </Text>
-                            <Text className="p-2 text-red-700 text-xs">
-                              Absent
-                            </Text>
-                            <Text className="p-2 text-yellow-700 text-xs">
-                              Half Day
-                            </Text>
-                          </View>
-                        </View>
-
-                        {/* <DataTable>
-                        <DataTable.Header>
-                          <DataTable.Title>P</DataTable.Title>
-                          <DataTable.Title>A</DataTable.Title>
-                          <DataTable.Title>HD</DataTable.Title>
-                          <DataTable.Title>H</DataTable.Title>
-                        </DataTable.Header>
-                        <DataTable.Row className="flex flex-row justify-between">
-                          <DataTable.Cell>{item?.present}</DataTable.Cell>
-                          <DataTable.Cell>{item?.absent}</DataTable.Cell>
-                          <DataTable.Cell>{item?.halfday}</DataTable.Cell>
-                          <DataTable.Cell>1</DataTable.Cell>
-                          <DataTable.Cell>8</DataTable.Cell>
-                        </DataTable.Row>
-                      </DataTable> */}
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </View>
+              
             </>
           )}
 
@@ -658,7 +594,7 @@ const EmployeeDetails = (props: Props) => {
                   <Text>No Advance</Text>
                 )}
               </View>
-              <View className="mx-5 p-4 bg-white rounded-md shadow-md">
+              <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-10">
                 <View className="flex flex-row items-center justify-between mb-5">
                   <Text className="text-lg font-bold ">Extra Bonus</Text>
                   <Pressable onPress={() => toggleModalExtraBonus()}>
@@ -710,7 +646,14 @@ const EmployeeDetails = (props: Props) => {
           {selectedTab === "Salary" && (
             <View className="mx-5 p-4 bg-white rounded-md shadow-md">
               <View className=" bg-white rounded-lg shadow">
-                <Text className="text-lg font-bold mb-3">Salary Details</Text>
+                <View className="flex flex-row items-center justify-between mb-4">
+                  <Text className="text-lg font-bold mb-3">Salary Details</Text>
+                  {/* Table Row: Base Salary */}
+                  <View className="flex flex-cols items-center justify-center py-2">
+                    <Text>Base Salary</Text>
+                    <Text>₹ {attendance[0].salary || "----"}</Text>
+                  </View>
+                </View>
 
                 {/* Table Header */}
                 <View className="flex flex-row justify-between mb-2">
@@ -726,31 +669,26 @@ const EmployeeDetails = (props: Props) => {
 
                 {/* Table Row: Current Salary */}
                 <View className="flex flex-row justify-between border-b border-gray-200 py-2">
-                  <Text>Current Salary</Text>
+                  <Text>Salary payable</Text>
                   <Text>
-                  ₹{" "}{(attendance[0].present * attendance[0].salary) / 30}
+                    ₹ {(attendance[0].present * attendance[0].salary) / 30}
                   </Text>
-                </View>
-
-                {/* Table Row: Base Salary */}
-                <View className="flex flex-row justify-between border-b border-gray-200 py-2">
-                  <Text>Base Salary</Text>
-                  <Text>₹{" "}{attendance[0].salary}</Text>
                 </View>
 
                 {/* Table Row: Advance Amount */}
                 <View className="flex flex-row justify-between border-b border-gray-200 py-2">
                   <Text>Advance Amount</Text>
-                  <Text>₹{" "}{totalAdvanceAmount}</Text>
+                  <Text>₹ {totalAdvanceAmount || "----"}</Text>
                 </View>
 
                 {/* Table Row: Due Amount */}
                 <View className="flex flex-row justify-between py-2">
                   <Text>Due Amount</Text>
                   <Text>
-                  ₹{" "}{totalAdvanceAmount >= attendance[0].salary
+                    ₹{" "}
+                    {(totalAdvanceAmount >= attendance[0].salary
                       ? attendance[0].salary - totalAdvanceAmount
-                      : 0}
+                      : 0) || "----"}
                   </Text>
                 </View>
               </View>

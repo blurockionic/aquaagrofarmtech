@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Auth from "../models/auth.model.js";
 import { sendCookie } from "../utils/cookie.js";
+import Employee from "../models/employee.model.js";
 
 export const registration = async (req, res) => {
   const { email, password, fullName, role, clerk_id } = req.body;
@@ -126,20 +127,15 @@ export const login = async (req, res) => {
 
 //verify owner
 export const verifyEmail = async (req, res) => {
+  const { email } = req.body;
   try {
-    const { token } = req.query;
-
-    const user = await Auth.findOne({ verificationToken: token });
+    const user = await Employee.findOne({ email: email });
 
     if (user) {
       // Mark the user as verified and clear the verification token
-      user.isVerified = true;
-      user.verificationToken = null;
-      await user.save();
-
-      res.send("Email verified successfully!");
+      res.json({ message: "Email verified successfully!" });
     } else {
-      res.status(404).send("Invalid verification token.");
+      res.status(404).json({ message: "Email not verified!." });
     }
   } catch (error) {
     console.error(error);
@@ -189,15 +185,14 @@ export const logout = async (req, res) => {
   });
 };
 
-
 export const getProfile = async (req, res) => {
-  
   try {
-    const user = await Auth.find({clerk_id: req.params.id}).select("-password");
-    res.status(200).json({user});
-
+    const user = await Auth.find({ clerk_id: req.params.id }).select(
+      "-password"
+    );
+    res.status(200).json({ user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};

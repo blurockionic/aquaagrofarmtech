@@ -5,16 +5,44 @@ import { ApiUrl } from "@/config/ServerConnection";
 import axios from "axios";
 import moment from "moment";
 import RNPickerSelect from "react-native-picker-select";
+import { Ionicons } from "@expo/vector-icons";
 
 const AttendanceInCalender = ({ employeeId }: { employeeId: string }) => {
   const [selectedDate, setSelectedDate] = useState("");
   const [attendanceStatus, setAttendanceStatus] = useState({});
   const [status, setStatus] = useState("present");
+  const [attendance, setAttendance] = useState<any>([]);
+  const [currentDate, setCurrentDate] = useState(moment());
+  const [changeMonth, setChangeMonth] = useState(new Date().getMonth() + 1);
+  const [changeYear, setChangeYear] = useState(new Date().getFullYear());
+  const [isMonthChanged, setIsMonthChanged] = useState(false);
 
   useEffect(() => {
     // Fetch get attendance data
     getAttendance();
-  }, [status]);
+    fetchAttendanceReoportById();
+  }, [status, isMonthChanged]);
+
+  // console.log("date data", new Date().toLocaleString("en-US", { month: "long" }));
+
+  const fetchAttendanceReoportById = async () => {
+    try {
+      const response = await axios.get(
+        `${ApiUrl}/attendance/report/${employeeId}`,
+        {
+          params: {
+            month: changeMonth,
+            year: changeYear,
+          },
+        }
+      );
+      setAttendance(response.data.report);
+      setIsMonthChanged(false);
+    } catch (error) {
+      setIsMonthChanged(false);
+      console.error("Error fetching attendance report:", error);
+    }
+  };
 
   const getAttendance = async () => {
     try {
@@ -109,59 +137,121 @@ const AttendanceInCalender = ({ employeeId }: { employeeId: string }) => {
   };
 
   return (
-    <View style={styles.outerContainer}>
-      <View style={styles.container}>
-        {/* Header Text */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingHorizontal: 10,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>Attendance</Text>
-          <RNPickerSelect
-            onValueChange={(value) => handleOnStatusChange(value)}
-            placeholder={{ label: "Select Status", value: null }}
-            items={[
-              { label: "Present", value: "present" },
-              { label: "Absent", value: "absent" },
-              { label: "Half Day", value: "halfday" },
-            ]}
+    <>
+      <View style={styles.outerContainer}>
+        <View style={styles.container}>
+          {/* Header Text */}
+          <View
             style={{
-              inputIOS: styles.picker,
-              inputAndroid: styles.picker,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingHorizontal: 10,
+            }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "bold" }}>Attendance</Text>
+            <RNPickerSelect
+              onValueChange={(value) => handleOnStatusChange(value)}
+              placeholder={{ label: "Select Status", value: null }}
+              items={[
+                { label: "Present", value: "present" },
+                { label: "Absent", value: "absent" },
+                { label: "Half Day", value: "halfday" },
+              ]}
+              style={{
+                inputIOS: styles.picker,
+                inputAndroid: styles.picker,
+              }}
+            />
+          </View>
+
+          {/* Basic Calendar Component */}
+          <Calendar
+            // Initially visible month. Default = Date()
+            // current={"2024-09-17"}
+            current={moment(Date.now()).format("YYYY-MM-DD")}
+            // Handler which gets executed on day press. Default = undefined
+            onDayPress={(day: any) => {
+              console.log("selected day", day);
+              setSelectedDate(day.dateString);
+            }}
+            //   Marking a single date as selected
+            markedDates={attendanceStatus}
+            //on month change while scrolling. Default = undefined
+            onMonthChange={(month: any) => {
+              setChangeMonth(month.month);
+              setChangeYear(month.year);
+              setIsMonthChanged(true);
+            }}
+            // Theme customization
+            theme={{
+              selectedDayBackgroundColor: "green",
+              todayTextColor: "red",
+              arrowColor: "orange",
+              monthTextColor: "blue",
             }}
           />
+
+          <Text style={styles.selectedText}>
+            Date: {moment(Date.now()).format("YYYY-MM-DD")}
+          </Text>
         </View>
-
-        {/* Basic Calendar Component */}
-        <Calendar
-          // Initially visible month. Default = Date()
-          // current={"2024-09-17"}
-          current={moment(Date.now()).format("YYYY-MM-DD")}
-          // Handler which gets executed on day press. Default = undefined
-          onDayPress={(day: any) => {
-            console.log("selected day", day);
-            setSelectedDate(day.dateString);
-          }}
-          //   Marking a single date as selected
-          markedDates={attendanceStatus}
-          // Theme customization
-          theme={{
-            selectedDayBackgroundColor: "green",
-            todayTextColor: "red",
-            arrowColor: "orange",
-            monthTextColor: "blue",
-          }}
-        />
-
-        <Text style={styles.selectedText}>
-          Date: {moment(Date.now()).format("YYYY-MM-DD")}
-        </Text>
       </View>
-    </View>
+      <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-10">
+        <Text className="text-md font-bold">Summary</Text>
+        <View style={{ marginHorizontal: 5 }}>
+          {/* attendance status */}
+          {attendance.length > 0 ? (
+            attendance?.map((item, index) => (
+              <View key={index} style={{ marginVertical: 2 }}>
+                <View
+                  style={{
+                    marginTop: 15,
+                    margin: 5,
+                    padding: 5,
+
+                    borderRadius: 5,
+                  }}
+                >
+                  <View className="flex flex-row justify-between items-center w-full">
+                    <Text className="text-center  bg-green-200 text-lg px-6 py-4 rounded-md">
+                      {item?.present}
+                    </Text>
+                    <Text className="text-center  bg-red-300 text-lg px-6 py-4 rounded-md">
+                      {item?.absent}
+                    </Text>
+                    <Text className="text-center  bg-yellow-300 text-lg px-6 py-4 rounded-md">
+                      {item?.halfday}
+                    </Text>
+                  </View>
+                  <View className="flex flex-row items-center justify-end mt-4">
+                    <Ionicons
+                      name="information-circle-outline"
+                      size={20}
+                      color={"#6B7280"}
+                      className="text-gray-300"
+                    />
+                    <View className="flex flex-row justify-end items-center">
+                      <Text className="p-2 text-green-700 text-xs">
+                        Present
+                      </Text>
+                      <Text className="p-2 text-red-700 text-xs">Absent</Text>
+                      <Text className="p-2 text-yellow-700 text-xs">
+                        Half Day
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text className="text-center p-4 bg-gray-100 mt-2 rounded-sm">
+              No Summary found
+            </Text>
+          )}
+        </View>
+      </View>
+    </>
   );
 };
 
