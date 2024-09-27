@@ -5,6 +5,7 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Pressable, Text } from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -83,6 +84,18 @@ export default function TabLayout() {
               name={focused ? "person" : "person-outline"}
               color={color}
             />
+          ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                console.log("hello");
+              }}
+              style={{
+                marginRight: 16,
+              }}
+            >
+              <Ionicons name="settings-outline" size={24} color="black" />
+            </Pressable>
           ),
         }}
       />

@@ -1,15 +1,12 @@
 import { View, Text, Pressable, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams } from "expo-router";
-import { ApiUrl } from "@/config/ServerConnection";
 import axios from "axios";
-import { Ionicons } from "@expo/vector-icons";
 import {
   GestureHandlerRootView,
   TextInput,
 } from "react-native-gesture-handler";
 import moment from "moment";
-import { DataTable } from "react-native-paper";
+import { Ionicons } from "@expo/vector-icons"; // Importing Ionicons for the eye icon
 import { useUser } from "@clerk/clerk-expo";
 
 type Props = {};
@@ -17,68 +14,87 @@ type Props = {};
 const Profile = (props: Props) => {
   const { user } = useUser();
   const [currentDate, setCurrentDate] = useState(moment());
-  const [employeeId, setEmployeeId] = useState("");
-  // State to track which section is expanded
-  const [selectedTab, setSelectedTab] = useState(null); // State to track selected tab
-
   const [employee, setEmployee] = useState<any>([]);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  console.log(user?.id);
+  const [showOldPassword, setShowOldPassword] = useState(false); // For toggling old password visibility
+  const [showNewPassword, setShowNewPassword] = useState(false); // For toggling new password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // For toggling confirm password visibility
 
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get(`${ApiUrl}/auth/me/${user?.id}`); // Use the id to fetch employee data
+        const response = await axios.get(`${ApiUrl}/auth/me/${user?.id}`);
         setEmployee(response.data.user);
       } catch (error) {
         console.error("Error fetching employee details:", error);
       }
     };
 
-    if (user?.id) {
-      fetchEmployeeDetails();
-    }
+    // if (user?.id) {
+    //   fetchEmployeeDetails();
+    // }
   }, [user?.id]);
 
-  // if (!employee) {
-  //   return <Text>Loading...</Text>;
-  // }
+  const handleChangePassword = async () => {
+    setErrorMessage("");
+    setSuccessMessage("");
 
-  // Toggle section expansion
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("New password and confirmation do not match.");
+      return;
+    }
+
+    try {
+      await user?.updatePassword({
+        currentPassword: oldPassword,
+        newPassword,
+      });
+
+      setSuccessMessage("Password changed successfully!");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      setErrorMessage(
+        "Error changing password. Please check your current password."
+      );
+      console.error("Password change error:", error);
+    }
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View className="flex flex-row items-center justify-between pr-5">
-        <View className=" p-4 flex  flex-row items-center gap-4">
-          <View
-            style={{
-              width: 50,
-              height: 50,
-              borderRadius: 8,
-              padding: 10,
-              backgroundColor: "#4b6cb7",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={{ color: "white", fontSize: 16 }}>
-              {employee?.employeeName?.charAt(0)}
-            </Text>
-          </View>
-          <View className=" flex flex-cols">
-            <Text className="text-lg">{employee?.employeeName}</Text>
-            <Text className="text-gray text-sm">
-              {employee?.designation} ({employee?.employeeId})
-            </Text>
+      <ScrollView>
+        <View className="flex flex-row items-center justify-between pr-5">
+          <View className="p-4 flex flex-row items-center gap-4">
+            <View
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 8,
+                padding: 10,
+                backgroundColor: "#4b6cb7",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: "white", fontSize: 16 }}>
+                {user?.fullName?.charAt(0)}
+              </Text>
+            </View>
+            <View className="flex flex-cols">
+              <Text className="text-lg">{user?.fullName}</Text>
+              <Text className="text-gray text-sm capitalize">
+                {user?.publicMetadata?.role}
+              </Text>
+            </View>
           </View>
         </View>
-        <Ionicons name="settings-outline" size={24} color="black" />
-      </View>
-      {/* details of employee  */}
-      <View>
-        {/* Top Tab Section */}
-
-        {/* Toggleable Content */}
 
         <ScrollView className="h-screen mb-52 mx-5 p-4 bg-white rounded-md shadow-md">
           <View
@@ -91,13 +107,12 @@ const Profile = (props: Props) => {
             }}
           >
             <Text
-              style={{ fontSize: 14, fontWeight: "bold" }}
+              style={{ fontSize: 18, fontWeight: "bold" }}
               className="text-center"
             >
               Login Credential
             </Text>
             <Text style={{ fontSize: 14, fontWeight: "bold" }}>Email</Text>
-
             <TextInput
               style={{
                 padding: 10,
@@ -108,12 +123,12 @@ const Profile = (props: Props) => {
               }}
               placeholder="email"
               placeholderTextColor={"black"}
-              value={employee?.email}
+              value={user?.primaryEmailAddress?.emailAddress}
               editable={false} // Making the field non-editable
             />
           </View>
 
-          {/* Employee Details Section */}
+          {/* Change Password Section */}
           <View
             style={{
               borderWidth: 1,
@@ -125,174 +140,136 @@ const Profile = (props: Props) => {
             className="mb-10"
           >
             <Text
-              style={{ fontSize: 14, fontWeight: "bold" }}
+              style={{ fontSize: 18, fontWeight: "bold" }}
               className="text-center"
             >
-              Employee Details
+              Change Password
             </Text>
 
+            {/* Old Password Input */}
             <View style={{ marginVertical: 14 }}>
               <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                Full Name
+                Old password
               </Text>
-              <TextInput
-                value={employee?.employeeName}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Enter your full name"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TextInput
+                  value={oldPassword}
+                  onChangeText={setOldPassword}
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    borderColor: "#D0D0D0",
+                    borderWidth: 1,
+                    marginTop: 10,
+                    borderRadius: 5,
+                  }}
+                  placeholder="Old password"
+                  placeholderTextColor={"black"}
+                  secureTextEntry={!showOldPassword} // Toggle visibility
+                />
+                <Pressable
+                  onPress={() => setShowOldPassword(!showOldPassword)}
+                  style={{ marginLeft: 10 }}
+                >
+                  <Ionicons
+                    name={showOldPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color="gray"
+                  />
+                </Pressable>
+              </View>
             </View>
 
-            <View>
+            {/* New Password Input */}
+            <View style={{ marginVertical: 14 }}>
               <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                Employee Id
+                New password
               </Text>
-              <TextInput
-                value={employee?.employeeId}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Employee Id"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TextInput
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    borderColor: "#D0D0D0",
+                    borderWidth: 1,
+                    marginTop: 10,
+                    borderRadius: 5,
+                  }}
+                  placeholder="New password"
+                  placeholderTextColor={"black"}
+                  secureTextEntry={!showNewPassword} // Toggle visibility
+                />
+                <Pressable
+                  onPress={() => setShowNewPassword(!showNewPassword)}
+                  style={{ marginLeft: 10 }}
+                >
+                  <Ionicons
+                    name={showNewPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color="gray"
+                  />
+                </Pressable>
+              </View>
             </View>
 
-            <View style={{ marginVertical: 10 }}>
+            {/* Confirm Password Input */}
+            <View style={{ marginVertical: 14 }}>
               <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                Designation
+                Confirm new password
               </Text>
-              <TextInput
-                value={employee?.designation}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Designation"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TextInput
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    borderColor: "#D0D0D0",
+                    borderWidth: 1,
+                    marginTop: 10,
+                    borderRadius: 5,
+                  }}
+                  placeholder="Confirm new password"
+                  placeholderTextColor={"black"}
+                  secureTextEntry={!showConfirmPassword} // Toggle visibility
+                />
+                <Pressable
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ marginLeft: 10 }}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color="gray"
+                  />
+                </Pressable>
+              </View>
             </View>
 
-            <View>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                Mobile Number
+            {/* Error or Success Message */}
+            {errorMessage ? (
+              <Text style={{ color: "red", textAlign: "center" }}>
+                {errorMessage}
               </Text>
-              <TextInput
-                value={employee?.phoneNumber}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Mobile No"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                Date of Birth
+            ) : null}
+            {successMessage ? (
+              <Text style={{ color: "green", textAlign: "center" }}>
+                {successMessage}
               </Text>
-              <TextInput
-                value={employee?.dateOfBirth}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Enter Date of Birth"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
-            </View>
+            ) : null}
 
-            <View>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-                Joining Date
-              </Text>
-              <TextInput
-                value={employee?.joiningDate}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Joining Date"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
-            </View>
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginTop: 10,
-              }}
+            {/* Change Password Button */}
+            <Pressable
+              className="mt-10 bg-blue-500 p-3 rounded-md"
+              onPress={handleChangePassword}
             >
-              <Text>Active Employee</Text>
-              <Text>True</Text>
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>Salary</Text>
-              <TextInput
-                value={employee?.salary}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Enter Salary"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
-            </View>
-
-            <View>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>Address</Text>
-              <TextInput
-                value={employee?.address}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Enter Address"
-                placeholderTextColor={"black"}
-                editable={false} // Making the field non-editable
-              />
-            </View>
+              <Text className="text-center text-white">Change Password</Text>
+            </Pressable>
           </View>
         </ScrollView>
-      </View>
+      </ScrollView>
     </GestureHandlerRootView>
   );
 };

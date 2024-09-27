@@ -20,6 +20,7 @@ import moment from "moment";
 import { DataTable } from "react-native-paper";
 import Modal from "react-native-modal";
 import AttendanceInCalender from "@/components/attendance/AttendanceInCalender";
+import LocationOfEmployee from "@/components/location/LocationOfEmployee";
 
 type Props = {};
 
@@ -254,6 +255,9 @@ const EmployeeDetails = (props: Props) => {
       }
     }
   };
+
+
+  const payableSalary =  (attendance[0]?.present * attendance[0]?.salary) / 30
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -547,7 +551,6 @@ const EmployeeDetails = (props: Props) => {
           {selectedTab === "Attendance" && (
             <>
               <AttendanceInCalender employeeId={employeeId} />
-              
             </>
           )}
 
@@ -634,12 +637,7 @@ const EmployeeDetails = (props: Props) => {
           )}
 
           {selectedTab === "Location" && (
-            <View className="mx-5 p-4 bg-white rounded-md shadow-md">
-              <Text>
-                Location: Here you can show employee location or tracking
-                information.
-              </Text>
-            </View>
+            <LocationOfEmployee employeeId={employee?.clerk_id} />
           )}
 
           {/* //salary  */}
@@ -651,7 +649,7 @@ const EmployeeDetails = (props: Props) => {
                   {/* Table Row: Base Salary */}
                   <View className="flex flex-cols items-center justify-center py-2">
                     <Text>Base Salary</Text>
-                    <Text>₹ {attendance[0].salary || "----"}</Text>
+                    <Text>₹ {attendance[0]?.salary || "----"}</Text>
                   </View>
                 </View>
 
@@ -664,14 +662,16 @@ const EmployeeDetails = (props: Props) => {
                 {/* Table Row: Number of Working Days */}
                 <View className="flex flex-row justify-between border-b border-gray-200 py-2">
                   <Text>Number of Working Days</Text>
-                  <Text>{attendance[0].present}</Text>
+                  <Text>{attendance[0]?.present || "----"}</Text>
                 </View>
 
                 {/* Table Row: Current Salary */}
                 <View className="flex flex-row justify-between border-b border-gray-200 py-2">
                   <Text>Salary payable</Text>
                   <Text>
-                    ₹ {(attendance[0].present * attendance[0].salary) / 30}
+                    ₹{" "}
+                    {payableSalary.toFixed(2) ||
+                      "----"}
                   </Text>
                 </View>
 
@@ -686,9 +686,9 @@ const EmployeeDetails = (props: Props) => {
                   <Text>Due Amount</Text>
                   <Text>
                     ₹{" "}
-                    {(totalAdvanceAmount >= attendance[0].salary
-                      ? attendance[0].salary - totalAdvanceAmount
-                      : 0) || "----"}
+                    {(totalAdvanceAmount >= payableSalary
+                      ?totalAdvanceAmount - payableSalary
+                      : 0).toFixed(2) || "----"}
                   </Text>
                 </View>
               </View>

@@ -9,6 +9,9 @@ import authRoute  from "./routes/auth.routes.js"
 import employeeRoute  from "./routes/employee.routes.js"
 import attendanceRoute  from "./routes/attendance.routes.js"
 import advanceRoute  from "./routes/advance.routes.js"
+import locationRoute  from "./routes/location.routes.js"
+
+
 
 
 
@@ -50,3 +53,4 @@ app.use(`${apiVersion}/auth`, authRoute);
 app.use(`${apiVersion}/employee`, employeeRoute);
 app.use(`${apiVersion}/attendance`, attendanceRoute);
 app.use(`${apiVersion}/advance`, advanceRoute);
+app.use(`${apiVersion}/location`, locationRoute);

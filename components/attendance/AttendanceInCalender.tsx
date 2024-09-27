@@ -100,10 +100,9 @@ const AttendanceInCalender = ({ employeeId }: { employeeId: string }) => {
         // Set the marked dates
         setAttendanceStatus(markedDates);
       }
-
-      if (status === "half day") {
+      if (status === "halfday") {
         const halfDay = response?.data?.attendance.filter(
-          (item: any) => item?.status === "half day"
+          (item: any) => item?.status === "halfday"
         );
         //   console.log(present);
 

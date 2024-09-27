@@ -47,11 +47,11 @@ const user = () => {
     //   advanceOrLoan: advanceOrLoan,
     // };
     // console.log(data)
-    if (!advanceOrLoan || !extraBonus) {
-      Alert.alert("Please enter advance or loan amount");
-      return;
-    }
-    console.log(advanceOrLoan, extraBonus);
+    // if (!advanceOrLoan || !extraBonus) {
+    //   Alert.alert("Please enter advance or loan amount");
+    //   return;
+    // }
+    // console.log(advanceOrLoan, extraBonus);
     try {
       const response = await axios.post(`${ApiUrl}/attendance/mark`, {
         employeeId: params?.id,
@@ -118,9 +118,9 @@ const user = () => {
           </Text>
         </View>
       </Pressable>
-      <Text style={{ fontSize: 16, fontWeight: "500", marginHorizontal: 12 }}>
+      {/* <Text style={{ fontSize: 16, fontWeight: "500", marginHorizontal: 12 }}>
         Basic Pay : {params?.salary}
-      </Text>
+      </Text> */}
       <View style={{ marginHorizontal: 12 }}>
         <Text
           style={{
@@ -228,7 +228,7 @@ const user = () => {
             <Text>Holiday</Text>
           </Pressable>
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        {/* <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <TextInput
             style={{
               borderRadius: 6,
@@ -259,7 +259,7 @@ const user = () => {
             value={extraBonus}
             onChange={(e) => setExtraBonus(Number(e.nativeEvent.text))}
           />
-        </View>
+        </View> */}
 
         <Pressable
           onPress={submitAttendance}

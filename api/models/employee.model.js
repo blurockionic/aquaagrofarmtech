@@ -27,6 +27,9 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  clerk_id: {
+    type: String,
+  },
   dateOfBirth: {
     type: String,
     required: true,
