@@ -45,7 +45,6 @@ const SignUp = () => {
         Alert.alert(error.response?.data?.message);
         return;
       }
-      
       // Create the user and assign a role
       await signUp.create({
         emailAddress: form.email,
@@ -110,7 +109,7 @@ const SignUp = () => {
           state: "failed",
         }));
       }
-    } catch (err) {
+    } catch (err: any) {
       // Handle unexpected errors
       setVerification((prev) => ({
         ...prev,

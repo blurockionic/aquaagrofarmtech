@@ -19,8 +19,6 @@ export const newEmployee = async (req, res) => {
       password,
     } = req.body;
 
-    console.log(req.body);
-
     //create a new Employee
     const newEmployee = new Employee({
       employeeName,
@@ -97,7 +95,6 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-
 //get employee by id
 export const getEmployeeById = async (req, res) => {
   try {
@@ -105,7 +102,32 @@ export const getEmployeeById = async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-    res.status(200).json({employee});
+    res.status(200).json({ employee });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve the employee" });
+  }
+};
+
+export const getEmployeeByEmail = async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ email: req.body.email });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    res.status(200).json({ employee });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve the employee" });
+  }
+};
+
+//get employee by id
+export const getEmployeeByClerkId = async (req, res) => {
+  try {
+    const employee = await Employee.find({ clerk_id: req.params.id });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    res.status(200).json({ employee });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve the employee" });
   }

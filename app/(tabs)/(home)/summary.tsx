@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, ScrollView } from "react-native";
 import React, { useState, useEffect } from "react";
 import moment from "moment";
 import axios from "axios";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { DataTable } from "react-native-paper";
 import { ApiUrl } from "@/config/ServerConnection";
 
@@ -25,15 +25,12 @@ const summary = () => {
   };
   const fetchAttendanceReport = async () => {
     try {
-      const respone = await axios.get(
-        `${ApiUrl}/attendance/report`,
-        {
-          params: {
-            month: currentDate.month() + 1,
-            year: 2024,
-          },
-        }
-      );
+      const respone = await axios.get(`${ApiUrl}/attendance/report`, {
+        params: {
+          month: currentDate.month() + 1,
+          year: 2024,
+        },
+      });
 
       setAttendanceData(respone.data.report);
     } catch (error) {
@@ -42,8 +39,8 @@ const summary = () => {
   };
   useEffect(() => {
     fetchAttendanceReport();
-  }, []);
-  console.log(attendanceData);
+  }, [currentDate.month()]);
+  
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
       <View
@@ -73,9 +70,10 @@ const summary = () => {
 
       <View style={{ marginHorizontal: 12 }}>
         {attendanceData?.map((item, index) => (
-          <View key={index} style={{ marginVertical: 10 }}>
+          <View key={index} style={{ marginVertical: 10 }} className="bg-gray-50 px-4 py-5 shadow-lg">
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
+              className="bg-white rounded-md p-2"
             >
               <View
                 style={{
@@ -107,26 +105,37 @@ const summary = () => {
                 marginTop: 15,
                 margin: 5,
                 padding: 5,
-                backgroundColor: "#DEF7EC",
-                borderRadius: 5,
               }}
             >
-              <DataTable>
-                <DataTable.Header>
-                  <DataTable.Title>P</DataTable.Title>
-                  <DataTable.Title>A</DataTable.Title>
-                  <DataTable.Title>HD</DataTable.Title>
-                  <DataTable.Title>H</DataTable.Title>
-                  <DataTable.Title>NW</DataTable.Title>
-                </DataTable.Header>
-                <DataTable.Row>
-                  <DataTable.Cell>{item?.present}</DataTable.Cell>
-                  <DataTable.Cell>{item?.absent}</DataTable.Cell>
-                  <DataTable.Cell>{item?.halfday}</DataTable.Cell>
-                  <DataTable.Cell>1</DataTable.Cell>
-                  <DataTable.Cell>8</DataTable.Cell>
-                </DataTable.Row>
-              </DataTable>
+              {/* Header Row */}
+
+              {/* Data Row */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  paddingBottom: 5,
+                }}
+              >
+                <Text className="px-5 py-3 bg-green-300 text-black text-xl  rounded-sm">
+                  {item?.present}
+                </Text>
+                <Text className="px-5 py-3 bg-red-300 text-black text-xl  rounded-sm">
+                  {item?.absent}
+                </Text>
+                <Text className="px-5 py-3 bg-yellow-300 text-black text-xl  rounded-sm">
+                  {item?.halfday}
+                </Text>
+              </View>
+
+              <View
+               className="flex flex-row justify-end gap-4 items-center mt-2"
+              >
+                <Ionicons name="help-circle-outline" size={24} color="black" />
+                <Text className="text-sm text-green-500">Present</Text>
+                <Text className="text-sm text-red-500">Absent</Text>
+                <Text className="text-sm text-yellow-500">Halfday</Text>
+              </View>
             </View>
           </View>
         ))}

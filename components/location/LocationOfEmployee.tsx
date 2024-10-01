@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { ApiUrl } from "@/config/ServerConnection";
 import axios from "axios";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import moment from 'moment';
+import DateTimePicker from "@react-native-community/datetimepicker";
+import moment from "moment";
 
 type Props = {
   employeeId: string;
@@ -26,7 +26,9 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
 
   const getLocationById = async () => {
     try {
-      const response = await axios.get(`${ApiUrl}/location/history/${employeeId}`);
+      const response = await axios.get(
+        `${ApiUrl}/location/history/${employeeId}`
+      );
       const data = response.data.data;
       if (data && data.location) {
         setLocationData(data.location);
@@ -38,9 +40,10 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
 
   const filterDataByDate = () => {
     if (locationData) {
-      const selectedDate = moment(date).format('YYYY-MM-DD');
-      const filtered = locationData.filter((loc: any) =>
-        moment(loc.createdAt).format('YYYY-MM-DD') === selectedDate
+      const selectedDate = moment(date).format("YYYY-MM-DD");
+      const filtered = locationData.filter(
+        (loc: any) =>
+          moment(loc.createdAt).format("YYYY-MM-DD") === selectedDate
       );
       setFilteredData(filtered);
     }
@@ -48,12 +51,10 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
 
   const onDateChange = (event: any, selectedDate: Date | undefined) => {
     setShowPicker(false);
-    console.log(selectedDate);
     if (selectedDate) {
       setDate(selectedDate);
     }
   };
-
 
   return (
     <View className="h-screen px-5">
@@ -66,6 +67,11 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
           onChange={onDateChange}
         />
       )}
+
+      {/* Display the selected date */}
+      <Text style={{ marginTop: 10, fontSize: 16 }} className="mb-3">
+        {moment(date).format("MMMM Do YYYY, h:mm A")}
+      </Text>
 
       {filteredData ? (
         <MapView

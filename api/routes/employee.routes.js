@@ -1,5 +1,5 @@
 import express from "express";
-import { getEmployeeById, getEmployees, newEmployee } from "../controllers/employee.controller.js";
+import { getEmployeeByEmail, getEmployeeById, getEmployees, newEmployee } from "../controllers/employee.controller.js";
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.get("/all", getEmployees);
 
 //get employee by id route endpoint
 router.get("/:id", getEmployeeById);
+
+//get employee by email route endpoint
+router.get("/email", getEmployeeByEmail);
 
 export default router;

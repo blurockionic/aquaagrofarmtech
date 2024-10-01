@@ -45,7 +45,7 @@ const Home = (props: Props) => {
     text = `Latitude: ${location.latitude}, Longitude: ${location.longitude}`;
   }
 
-  console.log()
+
 
   return (
     <ScrollView>
