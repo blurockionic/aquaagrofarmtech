@@ -3,7 +3,6 @@ import Advance from "../models/advance.model.js";
 export const createAdvance = async (req, res) => {
   const { employeeId, advanceAmount, date, extraBonus } = req.body;
 
-  console.log("working", req.body);
   try {
     const advance = new Advance({
       employeeId: employeeId,
@@ -21,7 +20,6 @@ export const createAdvance = async (req, res) => {
 //get advance by id
 export const getAdvanceById = async (req, res) => {
   const { id } = req.params;
-  console.log("id", id);
   try {
     const advance = await Advance.find({ employeeId: id });
     if (!advance) {
