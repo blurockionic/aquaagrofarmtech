@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 
 const advanceSchema = new mongoose.Schema(
   {
-    employeeId: {
-      type: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Auth",
       required: true,
     },
     date: {

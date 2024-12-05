@@ -95,7 +95,7 @@ const Profile = (props: Props) => {
               </Text>
             </View>
           </View>
-          {/* <Ionicons name="settings-outline" size={24} color="black" /> */}
+          <Ionicons name="settings-outline" size={24} color="black" />
         </View>
 
         {/* Employee Details Section */}

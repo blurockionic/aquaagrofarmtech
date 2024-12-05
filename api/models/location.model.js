@@ -2,17 +2,9 @@ import mongoose from "mongoose";
 
 const locationSchema = new mongoose.Schema(
   {
-    fullName: {
-      type: String,
-    },
-    clerk_id: {
-      type: String,
-    },
-    email: {
-      type: String,
-    },
-    phone: {
-      type: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Auth",
     },
     location: [
       {

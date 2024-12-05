@@ -21,6 +21,8 @@ import { DataTable } from "react-native-paper";
 import Modal from "react-native-modal";
 import AttendanceInCalender from "@/components/attendance/AttendanceInCalender";
 import LocationOfEmployee from "@/components/location/LocationOfEmployee";
+import user from "../[user]";
+import Salary from "@/app/(emp-tabs)/salary";
 
 type Props = {};
 
@@ -38,6 +40,7 @@ interface ApiResponse {
 
 const EmployeeDetails = (props: Props) => {
   const { details } = useLocalSearchParams();
+  const [userDeatails, setUserDetails] = useState<EmployeeDetails | null>(null);
   const [currentDate, setCurrentDate] = useState(moment());
   const [employeeId, setEmployeeId] = useState("");
   // State to track which section is expanded
@@ -54,8 +57,18 @@ const EmployeeDetails = (props: Props) => {
   const [isClicked, setIsClicked] = useState(false);
   const [isExtrBonusModelOpen, setIsExtrBonusModelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEditClicked, setIsEditClicked] = useState(false);
 
   const [totalAdvanceAmount, setTotalAdvanceAmount] = useState(0);
+
+  const [formData, setFormData] = useState({
+    phone: "",
+    designation: "",
+    address: "",
+    joiningDate: "",
+    dateOfBirth: "",
+    salary: 0,
+  });
 
   // Function to fetch employee details
   useEffect(() => {
@@ -64,6 +77,16 @@ const EmployeeDetails = (props: Props) => {
         const response = await axios.get(`${ApiUrl}/employee/${details}`); // Use the id to fetch employee data
         setEmployee(response.data.employee);
         setEmployeeId(response.data.employee.employeeId);
+      } catch (error) {
+        console.error("Error fetching employee details:", error);
+      }
+    };
+
+    const fetchUserDetails = async () => {
+      try {
+        const response = await axios.get(`${ApiUrl}/auth/me/${details}`); // Use the id to fetch employee data
+        setUserDetails(response.data.user);
+        console.log(response.data, "hiii");
       } catch (error) {
         console.error("Error fetching employee details:", error);
       }
@@ -131,18 +154,22 @@ const EmployeeDetails = (props: Props) => {
     };
 
     if (details) {
+      fetchUserDetails();
       fetchEmployeeDetails();
-      fetchLoanAndAdvance();
+      // fetchLoanAndAdvance();
     }
-    if (employeeId) {
-      fetchAttendanceReoportById();
-      // fetchAttendanceReoportAdvanceOrLoan();
-    }
+    // if (employeeId) {
+    //   fetchAttendanceReoportById();
+    //   // fetchAttendanceReoportAdvanceOrLoan();
+    // }
   }, [details, employeeId, isLoading]);
 
   if (!employee) {
     return <Text>Loading...</Text>;
   }
+
+
+ 
 
   // Toggle section expansion
 
@@ -256,8 +283,27 @@ const EmployeeDetails = (props: Props) => {
     }
   };
 
+  const payableSalary = (attendance[0]?.present * attendance[0]?.salary) / 30;
 
-  const payableSalary =  (attendance[0]?.present * attendance[0]?.salary) / 30
+  //handle on edit
+  const handleOnedit = () => {
+    setIsEditClicked(true);
+  };
+
+  const handleOnUpdate = async () => {
+    setIsLoading(true);
+    setIsEditClicked(false);
+    console.log(formData);
+    //WIP: update the details
+    // await updateEmployeeDetails();
+    const response = await axios.put(
+      `${ApiUrl}/employee/update/${details}`, {
+        formData
+      }
+    )
+    console.log(response.data);
+    setIsLoading(false);
+  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -276,17 +322,16 @@ const EmployeeDetails = (props: Props) => {
               }}
             >
               <Text style={{ color: "white", fontSize: 16 }}>
-                {employee?.employeeName?.charAt(0)}
+                {userDeatails?.fullName?.charAt(0)}
               </Text>
             </View>
             <View className=" flex flex-cols">
-              <Text className="text-lg">{employee.employeeName}</Text>
+              <Text className="text-lg">{userDeatails?.fullName}</Text>
               <Text className="text-gray text-sm">
-                {employee.designation} ({employee.employeeId})
+                {userDeatails?.role} ({userDeatails?._id})
               </Text>
             </View>
           </View>
-          <Ionicons name="settings-outline" size={24} color="black" />
         </View>
         {/* details of employee  */}
         <View>
@@ -357,7 +402,7 @@ const EmployeeDetails = (props: Props) => {
                   }}
                   placeholder="email"
                   placeholderTextColor={"black"}
-                  value={employee.email}
+                  value={userDeatails?.email}
                   editable={false} // Making the field non-editable
                 />
               </View>
@@ -385,7 +430,7 @@ const EmployeeDetails = (props: Props) => {
                     Full Name
                   </Text>
                   <TextInput
-                    value={employee.employeeName}
+                    value={userDeatails?.fullName}
                     style={{
                       padding: 10,
                       borderColor: "#D0D0D0",
@@ -404,7 +449,7 @@ const EmployeeDetails = (props: Props) => {
                     Employee Id
                   </Text>
                   <TextInput
-                    value={employee.employeeId}
+                    value={userDeatails?._id}
                     style={{
                       padding: 10,
                       borderColor: "#D0D0D0",
@@ -431,9 +476,12 @@ const EmployeeDetails = (props: Props) => {
                       marginTop: 10,
                       borderRadius: 5,
                     }}
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, designation: e });
+                    }}
                     placeholder="Designation"
                     placeholderTextColor={"black"}
-                    editable={false} // Making the field non-editable
+                    editable={isEditClicked ? true : false} // Making the field non-editable
                   />
                 </View>
 
@@ -442,7 +490,7 @@ const EmployeeDetails = (props: Props) => {
                     Mobile Number
                   </Text>
                   <TextInput
-                    value={employee.phoneNumber}
+                    value={userDeatails?.phone}
                     style={{
                       padding: 10,
                       borderColor: "#D0D0D0",
@@ -450,9 +498,12 @@ const EmployeeDetails = (props: Props) => {
                       marginTop: 10,
                       borderRadius: 5,
                     }}
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, phone: e });
+                    }}
                     placeholder="Mobile No"
                     placeholderTextColor={"black"}
-                    editable={false} // Making the field non-editable
+                    editable={isEditClicked ? true : false} // Making the field non-editable
                   />
                 </View>
 
@@ -469,9 +520,12 @@ const EmployeeDetails = (props: Props) => {
                       marginTop: 10,
                       borderRadius: 5,
                     }}
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, dateOfBirth: e });
+                    }}
                     placeholder="Enter Date of Birth"
                     placeholderTextColor={"black"}
-                    editable={false} // Making the field non-editable
+                    editable={isEditClicked ? true : false} // Making the field non-editable
                   />
                 </View>
 
@@ -488,9 +542,12 @@ const EmployeeDetails = (props: Props) => {
                       marginTop: 10,
                       borderRadius: 5,
                     }}
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, joiningDate: e });
+                    }}
                     placeholder="Joining Date"
                     placeholderTextColor={"black"}
-                    editable={false} // Making the field non-editable
+                    editable={isEditClicked ? true : false} // Making the field non-editable
                   />
                 </View>
 
@@ -519,9 +576,12 @@ const EmployeeDetails = (props: Props) => {
                       marginTop: 10,
                       borderRadius: 5,
                     }}
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, salary: e });
+                    }}
                     placeholder="Enter Salary"
                     placeholderTextColor={"black"}
-                    editable={false} // Making the field non-editable
+                    editable={isEditClicked ? true : false} // Making the field non-editable
                   />
                 </View>
 
@@ -538,12 +598,51 @@ const EmployeeDetails = (props: Props) => {
                       marginTop: 10,
                       borderRadius: 5,
                     }}
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, address: e });
+                    }}
                     placeholder="Enter Address"
                     placeholderTextColor={"black"}
-                    editable={false} // Making the field non-editable
+                    editable={isEditClicked ? true : false} // Making the field non-editable
                   />
                 </View>
               </View>
+
+              {isEditClicked ? (
+                <View>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#4b6cb7",
+                      padding: 10,
+                      borderRadius: 5,
+                      marginTop: 10,
+                    }}
+                    onPress={() => {
+                      handleOnUpdate();
+                    }}
+                  >
+                    <Text style={{ color: "white", textAlign: "center" }}>
+                      Save
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#4b6cb7",
+                    padding: 10,
+                    borderRadius: 5,
+                    marginTop: 10,
+                  }}
+                  onPress={() => {
+                    handleOnedit();
+                  }}
+                >
+                  <Text style={{ color: "white", textAlign: "center" }}>
+                    Edit
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -668,11 +767,7 @@ const EmployeeDetails = (props: Props) => {
                 {/* Table Row: Current Salary */}
                 <View className="flex flex-row justify-between border-b border-gray-200 py-2">
                   <Text>Salary payable</Text>
-                  <Text>
-                    ₹{" "}
-                    {payableSalary.toFixed(2) ||
-                      "----"}
-                  </Text>
+                  <Text>₹ {payableSalary.toFixed(2) || "----"}</Text>
                 </View>
 
                 {/* Table Row: Advance Amount */}
@@ -687,8 +782,9 @@ const EmployeeDetails = (props: Props) => {
                   <Text>
                     ₹{" "}
                     {(totalAdvanceAmount >= payableSalary
-                      ?totalAdvanceAmount - payableSalary
-                      : 0).toFixed(2) || "----"}
+                      ? totalAdvanceAmount - payableSalary
+                      : 0
+                    ).toFixed(2) || "----"}
                   </Text>
                 </View>
               </View>

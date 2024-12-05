@@ -88,7 +88,8 @@ export const newEmployee = async (req, res) => {
 //endpoint to fetch all the employee
 export const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find();
+    const user = await Auth.find();
+    const employees = user.filter((user) => user.role === "employee");
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve the employees" });
@@ -98,7 +99,7 @@ export const getEmployees = async (req, res) => {
 //get employee by id
 export const getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = await Employee.findOne({ userId: req.params.id });
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
@@ -130,5 +131,51 @@ export const getEmployeeByClerkId = async (req, res) => {
     res.status(200).json({ employee });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve the employee" });
+  }
+};
+
+//update employee information
+export const updateEmployee = async (req, res) => {
+  const { formData } = req.body;
+  const { phone, designation, address, joiningDate, salary, dateOfBirth } =
+    formData;
+
+  console.log(phone, designation, address, joiningDate, salary, dateOfBirth);
+
+  try {
+    // Check if the employee exists
+    const existingEmployee = await Employee.findOne({ userId: req.params.id });
+
+    if (!existingEmployee) {
+      // Create a new employee entry if not found
+      const newEmployee = new Employee({
+        userId: req.params.id,
+        ...formData,
+      });
+
+      await newEmployee.save();
+
+      return res
+        .status(201)
+        .json({ message: "New employee created", employee: newEmployee });
+    }
+
+    // Update the existing employee
+    const updatedEmployee = await Employee.findOne({ userId: req.params.id });
+    //update the details
+    updatedEmployee.phone = phone;
+    updatedEmployee.designation = designation;
+    updatedEmployee.address = address;
+    updatedEmployee.joiningDate = joiningDate;
+    updatedEmployee.salary = salary;
+    updatedEmployee.dateOfBirth = dateOfBirth;
+    await updatedEmployee.save();
+
+    return res
+      .status(200)
+      .json({ message: "Employee updated", employee: updatedEmployee });
+  } catch (error) {
+    console.error("Error updating employee:", error);
+    return res.status(500).json({ message: "Failed to update the employee" });
   }
 };

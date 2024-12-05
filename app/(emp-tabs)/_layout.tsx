@@ -1,14 +1,16 @@
 import { router, Tabs } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Pressable, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { ApiUrl } from "@/config/ServerConnection";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const [isLogoutClick, setIsLogoutClick] = useState(false);
+  
 
   return (
     <Tabs
@@ -18,7 +20,7 @@ export default function TabLayout() {
         tabBarHideOnKeyboard: true,
       }}
     >
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="(home)"
         options={{
           title: "Home",
@@ -34,6 +36,7 @@ export default function TabLayout() {
               onPress={() => {
                 // Add your logout logic here, for example:
                 // signOut function or clearing authentication tokens
+                signOut();
                 router.replace("/(auth)/sign-in");
               }}
               style={{
@@ -47,11 +50,11 @@ export default function TabLayout() {
             </Pressable>
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
-        name="employee"
+        name="attendance"
         options={{
-          title: "Employee",
+          title: "Attendance",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "people" : "people-outline"}
@@ -61,12 +64,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="inventory"
+        name="salary"
         options={{
-          title: "Inventory",
+          title: "Salary",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "list" : "list-outline"}
+              name={focused ? "wallet" : "wallet-outline"}
               color={color}
             />
           ),
@@ -81,18 +84,6 @@ export default function TabLayout() {
               name={focused ? "person" : "person-outline"}
               color={color}
             />
-          ),
-          headerRight: () => (
-            <Pressable
-              onPress={() => {
-                console.log("hello");
-              }}
-              style={{
-                marginRight: 16,
-              }}
-            >
-              <Ionicons name="settings-outline" size={24} color="black" />
-            </Pressable>
           ),
         }}
       />

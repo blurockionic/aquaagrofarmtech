@@ -1,42 +1,63 @@
-
 import OAuth from "@/components/OAuth";
 import { icons, images } from "@/constants";
 import { Link, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Text, View, ScrollView, Image, Alert } from "react-native";
-import { useSignIn } from "@clerk/clerk-expo";
 import InputField from "@/components/input/InputField";
 import CustomButton from "@/components/button/CustomButton";
+import { ApiUrl } from "@/config/ServerConnection";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignIn = () => {
-  const { signIn, setActive, isLoaded } = useSignIn();
   const router = useRouter();
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
-  const onSignInPress = useCallback(async () => {
-    if (!isLoaded) {
-      return;
-    }
-
+  const onSignInPress = async () => {
     try {
-      const signInAttempt = await signIn.create({
-        identifier: form.email,
+      // Validate input
+      if (!form.email || !form.password) {
+        Alert.alert("Error", "Please enter email and password!");
+        return;
+      }
+
+      // Make API request to your backend login route
+      const response = await axios.post(`${ApiUrl}/auth/login`, {
+        email: form.email,
         password: form.password,
       });
 
-      if (signInAttempt.status === "complete") {
-        await setActive({ session: signInAttempt.createdSessionId });
-        router.replace("/");
+      // Check if login was successful
+      if (response.data.success) {
+        // Store JWT token locally (you can replace this with other storage methods if needed)
+        await AsyncStorage.setItem("token", response.data.token);
+
+        // Optionally store the user data
+        await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+
+        // You can navigate to the next screen after successful login
+        Alert.alert("Success", response.data.message);
+
+        if (response.data.user.role === "admin") {
+          router.push("/(tabs)/home");
+        } else {
+          router.push("/(emp-tabs)/salary");
+        }
       } else {
-        Alert.alert("Error", "error during sign in");
+        Alert.alert("Login Failed", response.data.message);
       }
-    } catch (err: any) {
-      Alert.alert("Error", err.errors[0].longMessage);
+    } catch (error) {
+      // Handle any error
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "An error occurred during login"
+      );
     }
-  }, [isLoaded, form.email, form.password, router, setActive, signIn]);
+  };
+
   return (
     <>
       <ScrollView className="flex-1 bg-white">

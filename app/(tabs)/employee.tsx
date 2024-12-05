@@ -106,7 +106,9 @@ const Employees = () => {
                   </View>
                   <View className=" flex flex-cols">
                     <Text className="text-lg">{employee?.employeeName}</Text>
-                    <Text className="text-gray text-sm">{employee?.designation} ({employee?.employeeId})</Text>
+                    <Text className="text-gray text-sm">
+                      {employee?.designation} ({employee?.employeeId})
+                    </Text>
                   </View>
                 </View>
               </Pressable>

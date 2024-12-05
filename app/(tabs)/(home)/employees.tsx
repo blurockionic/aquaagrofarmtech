@@ -19,17 +19,19 @@ const Employees = () => {
   const router = useRouter(); // Router hook for navigation
 
   useEffect(() => {
-    // Fetch employee data on component mount
     const fetchEmployeeData = async () => {
       try {
         const response = await axios.get(`${ApiUrl}/employee/all`);
-        setEmployees(response.data); // Set employees state with fetched data
+        const fetchedEmployees = response.data || []; // Fallback to an empty array if undefined
+        setEmployees(fetchedEmployees);
       } catch (error) {
-        console.log("error fetching employee data", error); // Log any errors during fetching
+        console.error("Error fetching employee data:", error);
+        setEmployees([]); // Ensure state is always defined
       }
     };
-    fetchEmployeeData(); // Trigger the fetch function
+    fetchEmployeeData();
   }, []);
+
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -38,6 +40,7 @@ const Employees = () => {
           flexDirection: "row",
           alignItems: "center",
           backgroundColor: "white",
+          marginHorizontal: 10,
         }}
       >
         {/* Search bar and add button */}
@@ -60,15 +63,14 @@ const Employees = () => {
             color="black"
           />
           <TextInput
-            value={input} // Search input value
-            onChangeText={(text) => setInput(text)} // Update search input state
+            value={input}
+            onChangeText={(text) => setInput(text)}
             style={{ flex: 1 }}
             placeholder="Search"
           />
 
-          {/* Add employee button only visible when there are employees */}
           {employees.length > 0 && (
-            <View>
+            <View className="hidden">
               <Pressable onPress={() => router.push("/(home)/adddetails")}>
                 <AntDesign name="pluscircle" size={30} color="#0072b1" />
               </Pressable>
@@ -77,36 +79,33 @@ const Employees = () => {
         </Pressable>
       </View>
 
-      {/* Display search results if employees exist, otherwise show "no employees" message */}
       {employees.length > 0 ? (
         <View>
           {employees
-            .filter(
-              (employee) =>
-                employee.employeeName
-                  .toLowerCase()
-                  .includes(input.toLowerCase()) // Filter based on search input
+            .filter((employee) =>
+              employee.fullName.toLowerCase().includes(input.toLowerCase())
             )
             .map((employee) => (
               <Pressable
-                key={employee.employeeId}
-                onPress={() => router.push(`/employee/${employee._id}`)} // Navigate to employee details page on click
+                key={employee._id}
+                onPress={() => router.push(`/employee/${employee._id}`)}
                 style={{
                   padding: 10,
                   borderBottomWidth: 1,
                   borderColor: "#E0E0E0",
                 }}
               >
-                {/* Wrap employee name inside Text component */}
-                <View className=" p-4 flex  flex-row items-center gap-4">
-                  <View className="bg-blue-800 px-5  py-4 flex  flex-row rounded-md">
+                <View className="p-4 flex flex-row items-center gap-4">
+                  <View className="bg-blue-800 px-5 py-4 flex flex-row rounded-md">
                     <Text className="text-white text-lg">
-                      {employee.employeeName.charAt(0)}
+                      {employee.fullName.charAt(0)}
                     </Text>
                   </View>
-                  <View className=" flex flex-cols">
-                    <Text className="text-lg">{employee.employeeName}</Text>
-                    <Text className="text-gray text-sm">{employee.designation} ({employee.employeeId})</Text>
+                  <View className="flex flex-cols">
+                    <Text className="text-lg">{employee.fullName}</Text>
+                    <Text className="text-gray text-sm">
+                      {employee.role} ({employee._id})
+                    </Text>
                   </View>
                 </View>
               </Pressable>
@@ -119,8 +118,7 @@ const Employees = () => {
           <Image source={images.noResult} className="w-40 h-40" />
           <Text>No employees found</Text>
           <Text>Press on the plus button and add your Employee</Text>
-          {/* Add employee button */}
-          <Pressable onPress={() => router.push("/(home)/adddetails")}>
+          <Pressable onPress={() => router.push("/(home)/adddetails")} disabled className="hidden">
             <AntDesign
               style={{ marginTop: 30 }}
               name="pluscircle"

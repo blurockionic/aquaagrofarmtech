@@ -3,13 +3,10 @@ import Location from "../models/location.model.js";
 // Create a new location
 export const createLocation = async (req, res) => {
   try {
-    const { fullName, clerk_id, email, phone, location } = req.body;
+    const { userId, location } = req.body;
 
     const newLocation = new Location({
-      fullName,
-      clerk_id,
-      email,
-      phone,
+      userId,
       location,
     });
 
@@ -49,7 +46,7 @@ export const getAllLocations = async (req, res) => {
 export const getLocationById = async (req, res) => {
   try {
     // Find a single location by clerk_id
-    const location = await Location.findOne({ clerk_id: req.params.id });
+    const location = await Location.findOne({ userId: req.params.id });
 
     // Check if the location was found
     if (!location) {
@@ -82,7 +79,7 @@ export const updateLocation = async (req, res) => {
     console.log(req.body);
 
     const updatedLocation = await Location.findOneAndUpdate(
-      { clerk_id: req.params.id },
+      { userId: req.params.id },
       { $push: { location } }, // Push new location points to the array
       { new: true, runValidators: true }
     );

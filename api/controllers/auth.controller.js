@@ -2,10 +2,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import Auth from "../models/auth.model.js";
 import { sendCookie } from "../utils/cookie.js";
-import Employee from "../models/employee.model.js";
 
 export const registration = async (req, res) => {
-  const { email, password, fullName, role, clerk_id } = req.body;
+  const { email, password, fullName, role } = req.body;
 
   try {
     // Validation
@@ -48,10 +47,10 @@ export const registration = async (req, res) => {
       email,
       password: hashPassword,
       role: role,
-      clerk_id: clerk_id,
     });
 
     // Send cookie and response
+
     sendCookie(user, res, "Account created successfully.", 201);
   } catch (error) {
     console.error("Registration error:", error);
@@ -81,43 +80,43 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Email does not exist! Please register!",
+        message: "Email already exist! Please login!",
       });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(isMatch, "woking");
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Please enter the correct password!",
+        message: "Incorrect password! Please try again.",
       });
     }
 
     // Generate a JSON Web Token (JWT)
     const token = jwt.sign(
       { _id: user._id },
-      process.env.JWT_SECRET || "your_jwt_secret",
+      process.env.JWT_SECRET || "your_jwt_secret", // Ensure you have a secure secret key
       {
-        expiresIn: "3d",
+        expiresIn: "3d", // Token expires in 3 days
       }
     );
 
-    // Set cookie for token and return success response
-    const options = {
-      expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
-      httpOnly: true,
-      sameSite: "None",
-      secure: true,
-    };
-
-    return res.cookie("token", token, options).status(200).json({
+    // Return success response with token and user details
+    return res.status(200).json({
       success: true,
       token,
-      user,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
       message: "Login successful!",
     });
   } catch (error) {
+    console.error("Login error:", error.message);
     return res.status(500).json({
       success: false,
       message: error.message || "An error occurred during login",
@@ -129,7 +128,7 @@ export const login = async (req, res) => {
 export const verifyEmail = async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await Employee.findOne({ email: email });
+    const user = await Auth.findOne({ email: email });
 
     if (user) {
       // Mark the user as verified and clear the verification token
@@ -150,7 +149,7 @@ export const updateDetails = async (req, res, next) => {
       req.body.password = await bcrypt.hash(req.body.password, 12);
     }
 
-    const updateUser = await AuthUser.findByIdAndUpdate(
+    const updateUser = await Auth.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
@@ -187,9 +186,8 @@ export const logout = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
-    const user = await Auth.find({ clerk_id: req.params.id }).select(
-      "-password"
-    );
+    console.log(req.params.id);
+    const user = await Auth.findOne({ _id: req.params.id });
     res.status(200).json({ user });
   } catch (error) {
     console.error(error);
