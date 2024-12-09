@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.post("/create", createLocation); // Create a location
+router.post("/create/:id", createLocation); // Create a location
 router.get("/locations", getAllLocations); // Get all locations
 router.get("/history/:id", getLocationById); // Get location by ID
 router.put("/update/:id", updateLocation); // Update location by ID

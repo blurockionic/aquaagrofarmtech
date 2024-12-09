@@ -40,6 +40,8 @@ const summary = () => {
   useEffect(() => {
     fetchAttendanceReport();
   }, [currentDate.month()]);
+
+  console.log(attendanceData, "attendanceData");
   
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
@@ -87,15 +89,16 @@ const summary = () => {
                 }}
               >
                 <Text style={{ color: "white", fontSize: 16 }}>
-                  {item?.name?.charAt(0)}
+                  {item?.fullName?.charAt(0)}
                 </Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                  {item?.name}
+                  {item?.fullName}
                 </Text>
                 <Text style={{ marginTop: 5, color: "gray" }}>
-                  {item?.designation} ({item?.employeeId})
+                  {/* {item?.designation}  */}
+                  ({item?._id})
                 </Text>
               </View>
             </View>

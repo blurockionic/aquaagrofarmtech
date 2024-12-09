@@ -18,9 +18,9 @@ const AttendanceInCalender = ({ employeeId }: { employeeId: string }) => {
   const [isMonthChanged, setIsMonthChanged] = useState(false);
 
   useEffect(() => {
-    // Fetch get attendance data
     getAttendance();
     fetchAttendanceReoportById();
+    // Fetch get attendance data
   }, [status, isMonthChanged]);
 
   // console.log("date data", new Date().toLocaleString("en-US", { month: "long" }));
@@ -36,6 +36,7 @@ const AttendanceInCalender = ({ employeeId }: { employeeId: string }) => {
           },
         }
       );
+
       setAttendance(response.data.report);
       setIsMonthChanged(false);
     } catch (error) {

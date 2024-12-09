@@ -6,20 +6,19 @@ const locationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Auth",
     },
-    location: [
-      {
-        latitude: {
-          type: Number,
-        },
-        longitude: {
-          type: Number,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now(),
-        },
+    location: {
+      latitude: {
+        type: Number,
       },
-    ],
+      longitude: {
+        type: Number,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now(),
+      },
+    },
+
     expireAt: {
       type: Date,
       default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Set default expiry to 90 days from now

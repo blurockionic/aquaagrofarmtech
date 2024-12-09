@@ -31,6 +31,8 @@ const Employees = () => {
     fetchEmployeeData(); // Trigger the fetch function
   }, []);
 
+  console.log(employees);
+
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View
@@ -83,14 +85,14 @@ const Employees = () => {
           {employees
             .filter(
               (employee) =>
-                employee?.employeeName
-                  .toLowerCase()
-                  .includes(input.toLowerCase()) // Filter based on search input
+                employee?.userId?.fullName.includes(input.toLowerCase()) // Filter based on search input
             )
             .map((employee) => (
               <Pressable
-                key={employee?.employeeId}
-                onPress={() => router.push(`/employee/${employee?._id}`)} // Navigate to employee details page on click
+                key={employee?.userId?._id}
+                onPress={() =>
+                  router.push(`/employee/${employee?.userId?._id}`)
+                } // Navigate to employee details page on click
                 style={{
                   padding: 10,
                   borderBottomWidth: 1,
@@ -101,13 +103,13 @@ const Employees = () => {
                 <View className=" p-4 flex  flex-row items-center gap-4">
                   <View className="bg-blue-800 px-5  py-4 flex  flex-row rounded-md">
                     <Text className="text-white text-lg">
-                      {employee?.employeeName.charAt(0)}
+                      {employee?.userId.fullName.charAt(0)}
                     </Text>
                   </View>
                   <View className=" flex flex-cols">
-                    <Text className="text-lg">{employee?.employeeName}</Text>
+                    <Text className="text-lg">{employee?.userId.fullName}</Text>
                     <Text className="text-gray text-sm">
-                      {employee?.designation} ({employee?.employeeId})
+                      {employee?.userId.role} ({employee?.userId._id})
                     </Text>
                   </View>
                 </View>

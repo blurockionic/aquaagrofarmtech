@@ -5,6 +5,7 @@ import {
   View,
   TextInput,
   Image,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -14,6 +15,8 @@ import { images } from "@/constants";
 import { ApiUrl } from "@/config/ServerConnection";
 import AttendanceInCalender from "@/components/attendance/AttendanceInCalender";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
+import trackUserLocation from "@/components/location/trackUserLocation";
 
 const Attendance = () => {
   const [employeeId, setEmployeeId] = useState("");
@@ -30,7 +33,6 @@ const Attendance = () => {
     };
 
     fetchUser();
-
   }, []);
 
   useEffect(() => {
@@ -38,9 +40,8 @@ const Attendance = () => {
       fetchEmployeeDetails();
     }
   }, [user]);
-
-  console.log(user.id);
-
+  
+  trackUserLocation(user);
   const fetchEmployeeDetails = async () => {
     try {
       const response = await axios.get(`${ApiUrl}/employee/${user.id}`);
@@ -60,7 +61,7 @@ const Attendance = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      <AttendanceInCalender employeeId={employeeId} />
+      {user && <AttendanceInCalender employeeId={user.id} />}
     </View>
   );
 };

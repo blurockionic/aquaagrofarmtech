@@ -8,6 +8,7 @@ import CustomButton from "@/components/button/CustomButton";
 import { ApiUrl } from "@/config/ServerConnection";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 
 const SignIn = () => {
   const router = useRouter();
@@ -35,8 +36,11 @@ const SignIn = () => {
         // Store JWT token locally (you can replace this with other storage methods if needed)
         await AsyncStorage.setItem("token", response.data.token);
 
+        //saveToken
+        await SecureStore.setItemAsync("userToken", response.data.token);
         // Optionally store the user data
         await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+        await SecureStore.setItemAsync("user",JSON.stringify(response.data.user));
 
         // You can navigate to the next screen after successful login
         Alert.alert("Success", response.data.message);

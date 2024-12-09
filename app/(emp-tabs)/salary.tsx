@@ -43,17 +43,17 @@ const Salary = (props: Props) => {
 
 
   useEffect(() => {
-    fetchEmployeeDetails();
-    // if (employeeId) {
+    if (employee.id) {
+      fetchEmployeeDetails();
     //   fetchLoanAndAdvance();
      
-    // }
+    }
 
     // if(anotherEmployeeId){
     //   fetchAttendanceReoportById()
     // }
     // console.log("employeeId", employeeId);
-  }, []);
+  }, [employee.id]);
 
   const fetchLoanAndAdvance = async () => {
     try {
@@ -110,7 +110,14 @@ const Salary = (props: Props) => {
   };
 
 
-  const payableSalary =  (attendanceReport[0]?.present * attendanceReport[0]?.salary) / 30
+  //calculate payable salary
+  const payableSalary =
+  attendanceReport?.[0]?.present && attendanceReport?.[0]?.salary
+    ? (attendanceReport[0].present * attendanceReport[0].salary) / 30
+    : 0;
+
+console.log("payableSalary", payableSalary);
+
 
   return (
     <>
@@ -168,7 +175,7 @@ const Salary = (props: Props) => {
           <Text className="text-lg font-bold ">Advance</Text>
         </View>
         {advanceOrLoan.length > 0 ? (
-          advanceOrLoan.map((item, index) => (
+          advanceOrLoan.map((item: any, index: number) => (
             <View
               key={index}
               style={{ marginVertical: 2 }}

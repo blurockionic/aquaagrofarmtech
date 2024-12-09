@@ -3,6 +3,7 @@ import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import axios from "axios";
+import { ApiUrl } from "@/config/ServerConnection";
 
 
 const Home = () => {
@@ -22,69 +23,69 @@ const Home = () => {
   }, []);
 
 
-  useEffect(() => {
-    let subscription: Location.LocationSubscription | null = null;
+  // useEffect(() => {
+  //   let subscription: Location.LocationSubscription | null = null;
 
-    const startLocationUpdates = async () => {
-      try {
-        // Request location permissions
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
-          return;
-        }
+  //   const startLocationUpdates = async () => {
+  //     try {
+  //       // Request location permissions
+  //       const { status } = await Location.requestForegroundPermissionsAsync();
+  //       if (status !== "granted") {
+  //         setErrorMsg("Permission to access location was denied");
+  //         return;
+  //       }
 
-        // Start real-time location tracking
-        subscription = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.High,
-            timeInterval: 1000, // Update every second
-            distanceInterval: 1, // Update when user moves at least 1 meter
-          },
-          (loc) => {
-            setLocation(loc.coords);
-            console.log(
-              `Updated Location: ${loc.coords.latitude}, ${loc.coords.longitude}`
-            );
-          }
-        );
-      } catch (error) {
-        console.error("Error starting location updates:", error);
-      }
-    };
+  //       // Start real-time location tracking
+  //       subscription = await Location.watchPositionAsync(
+  //         {
+  //           accuracy: Location.Accuracy.High,
+  //           timeInterval: 1000, // Update every second
+  //           distanceInterval: 1, // Update when user moves at least 1 meter
+  //         },
+  //         (loc) => {
+  //           setLocation(loc.coords);
+  //           console.log(
+  //             `Updated Location: ${loc.coords.latitude}, ${loc.coords.longitude}`
+  //           );
+  //         }
+  //       );
+  //     } catch (error) {
+  //       console.error("Error starting location updates:", error);
+  //     }
+  //   };
 
-    startLocationUpdates();
+  //   startLocationUpdates();
 
-    // Cleanup subscription on unmount
-    return () => {
-      if (subscription) subscription.remove();
-    };
-  }, []);
+  //   // Cleanup subscription on unmount
+  //   return () => {
+  //     if (subscription) subscription.remove();
+  //   };
+  // }, []);
 
-  useEffect(() => {
-    const updateLocationToServer = async () => {
-      if (location && user) {
-        try {
-          await axios.put(`${ApiUrl}/location/update/${user.id}`, {
-            location: {
-              latitude: location.latitude,
-              longitude: location.longitude,
-            },
-          });
-          console.log("Location updated to server successfully");
-        } catch (error) {
-          console.error("Error updating location to server:", error);
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const updateLocationToServer = async () => {
+  //     if (location && user) {
+  //       try {
+  //         await axios.put(`${ApiUrl}/location/update/${user.id}`, {
+  //           location: {
+  //             latitude: location.latitude,
+  //             longitude: location.longitude,
+  //           },
+  //         });
+  //         console.log("Location updated to server successfully");
+  //       } catch (error) {
+  //         console.error("Error updating location to server:", error);
+  //       }
+  //     }
+  //   };
 
-    // Update location every 15 minutes
-    const intervalId = setInterval(() => {
-      updateLocationToServer();
-    }, 1000); // 1000 ms = 1 second
+  //   // Update location every 15 minutes
+  //   const intervalId = setInterval(() => {
+  //     updateLocationToServer();
+  //   }, 1000); // 1000 ms = 1 second
 
-    return () => clearInterval(intervalId);
-  }, [location, user]);
+  //   return () => clearInterval(intervalId);
+  // }, [location, user]);
 
   if (!user) {
     return <Redirect href="/(auth)/welcome" />;

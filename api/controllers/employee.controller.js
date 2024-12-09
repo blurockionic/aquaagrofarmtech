@@ -88,8 +88,7 @@ export const newEmployee = async (req, res) => {
 //endpoint to fetch all the employee
 export const getEmployees = async (req, res) => {
   try {
-    const user = await Auth.find();
-    const employees = user.filter((user) => user.role === "employee");
+    const employees = await Employee.find().populate("userId");
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve the employees" });
@@ -98,11 +97,16 @@ export const getEmployees = async (req, res) => {
 
 //get employee by id
 export const getEmployeeById = async (req, res) => {
+  console.log(req.params.id);
+  console.log("working");
   try {
-    const employee = await Employee.findOne({ userId: req.params.id });
+    const employee = await Employee.findOne({ userId: req.params.id }).populate(
+      "userId"
+    );
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
+    console.log(employee);
     res.status(200).json({ employee });
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve the employee" });
@@ -136,11 +140,9 @@ export const getEmployeeByClerkId = async (req, res) => {
 
 //update employee information
 export const updateEmployee = async (req, res) => {
-  const { formData } = req.body;
-  const { phone, designation, address, joiningDate, salary, dateOfBirth } =
-    formData;
+  const { phone, designation, address, joiningDate, salary } = req.body;
 
-  console.log(phone, designation, address, joiningDate, salary, dateOfBirth);
+  console.log(phone, designation, address, joiningDate, salary);
 
   try {
     // Check if the employee exists
@@ -150,7 +152,11 @@ export const updateEmployee = async (req, res) => {
       // Create a new employee entry if not found
       const newEmployee = new Employee({
         userId: req.params.id,
-        ...formData,
+        phone,
+        designation,
+        address,
+        joiningDate,
+        salary,
       });
 
       await newEmployee.save();

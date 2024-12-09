@@ -11,10 +11,10 @@ type Props = {
 };
 
 const LocationOfEmployee = ({ employeeId }: Props) => {
-  const [locationData, setLocationData] = useState<any>(null);
+  const [locationData, setLocationData] = useState<any[]>([]);
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const [filteredData, setFilteredData] = useState<any>(null);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
 
   useEffect(() => {
     getLocationById();
@@ -29,21 +29,23 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
       const response = await axios.get(
         `${ApiUrl}/location/history/${employeeId}`
       );
-      const data = response.data.data;
-      if (data && data.location) {
-        setLocationData(data.location);
+
+      const data = response.data.data; // Assuming the data is an array
+      console.log("Fetched Location Data:", data);
+
+      if (Array.isArray(data)) {
+        setLocationData(data);
       }
     } catch (error) {
-      console.log("Error fetching location:", error);
+      console.error("Error fetching location:", error);
     }
   };
 
   const filterDataByDate = () => {
-    if (locationData) {
+    if (locationData && locationData.length > 0) {
       const selectedDate = moment(date).format("YYYY-MM-DD");
-      const filtered = locationData.filter(
-        (loc: any) =>
-          moment(loc.createdAt).format("YYYY-MM-DD") === selectedDate
+      const filtered = locationData.filter((loc: any) =>
+        moment(loc.createdAt).isSame(selectedDate, "day")
       );
       setFilteredData(filtered);
     }
@@ -73,12 +75,12 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
         {moment(date).format("MMMM Do YYYY, h:mm A")}
       </Text>
 
-      {filteredData ? (
+      {filteredData && filteredData.length > 0 ? (
         <MapView
           className="h-[60%] rounded-lg"
           initialRegion={{
-            latitude: filteredData[0]?.latitude || 30.9172337,
-            longitude: filteredData[0]?.longitude || 75.8130101,
+            latitude: filteredData[0]?.location.latitude || 30.9172337,
+            longitude: filteredData[0]?.location.longitude || 75.8130101,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
@@ -88,8 +90,8 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
             <Marker
               key={loc._id}
               coordinate={{
-                latitude: loc.latitude,
-                longitude: loc.longitude,
+                latitude: loc.location.latitude,
+                longitude: loc.location.longitude,
               }}
               title={`Location ${index + 1}`}
             />
@@ -98,15 +100,15 @@ const LocationOfEmployee = ({ employeeId }: Props) => {
           {/* Add Polyline to connect markers */}
           <Polyline
             coordinates={filteredData.map((loc: any) => ({
-              latitude: loc.latitude,
-              longitude: loc.longitude,
+              latitude: loc.location.latitude,
+              longitude: loc.location.longitude,
             }))}
             strokeColor="blue"
             strokeWidth={4}
           />
         </MapView>
       ) : (
-        <Text>Loading location...</Text>
+        <Text>No location data for the selected date.</Text>
       )}
     </View>
   );

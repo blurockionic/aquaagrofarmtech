@@ -21,6 +21,8 @@ const user = () => {
   const [attendanceStatus, setAttendanceStatus] = useState("present");
   const [currentDate, setCurrentDate] = useState(moment());
 
+  console.log(params);
+
   const [extraBonus, setExtraBonus] = useState<Number>(0);
   const [advanceOrLoan, setAdvanceOrLoan] = useState<Number>(0);
 
@@ -54,8 +56,8 @@ const user = () => {
     // console.log(advanceOrLoan, extraBonus);
     try {
       const response = await axios.post(`${ApiUrl}/attendance/mark`, {
-        employeeId: params?.id,
-        employeeName: params?.name,
+        userId: params?.id,
+        fullName: params?.name,
         date: currentDate.format("MMMM D, YYYY"),
         status: attendanceStatus,
         extraBonus: extraBonus,

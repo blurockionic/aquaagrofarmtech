@@ -5,12 +5,14 @@ import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { ApiUrl } from "@/config/ServerConnection";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const markattendance = () => {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(moment());
   const [attendance, setAttendance] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [user, setUser] = useState([]);
 
   const goToNextDay = () => {
     const nextDate = moment(currentDate).add(1, "days");
@@ -26,7 +28,24 @@ const markattendance = () => {
     return date.format("MMMM D, YYYY");
   };
 
-  
+  const getUserData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        setUser(user);
+      } else {
+        console.log("No user data found.");
+      }
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
@@ -57,15 +76,19 @@ const markattendance = () => {
   }, [currentDate]);
 
   const employeeWithAttendance = employees.map((employee) => {
+    console.log(employee, "ghjghjgjgjgg");
     const attendanceRecord = attendance.find(
-      (record) => record.employeeId === employee.employeeId
+      (record) => record.userId === employee.userId._id
     );
+
+    console.log(attendanceRecord, "attendanceRecord");
 
     return {
       ...employee,
       status: attendanceRecord ? attendanceRecord.status : "", // 'Not Marked' or a default status
     };
   });
+
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <Pressable>
@@ -101,10 +124,10 @@ const markattendance = () => {
                 router.push({
                   pathname: "/[user]",
                   params: {
-                    name: item.employeeName,
-                    id: item.employeeId,
+                    name: item?.userId.fullName,
+                    id: item?.userId._id,
                     salary: item?.salary,
-                    designation: item?.designation,
+                    designation: item?.userId.role,
                   },
                 })
               }
@@ -128,15 +151,15 @@ const markattendance = () => {
                 }}
               >
                 <Text style={{ color: "white", fontSize: 16 }}>
-                  {item?.employeeName?.charAt(0)}
+                  {item?.userId.fullName?.charAt(0)}
                 </Text>
               </View>
-              <View style={{flex:1}}>
+              <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                  {item?.employeeName}
+                  {item?.userId.fullName}
                 </Text>
                 <Text style={{ marginTop: 5, color: "gray" }}>
-                  {item?.designation} ({item?.employeeId})
+                  {item?.userId.role} ({item?.userId._id})
                 </Text>
               </View>
               {item?.status && (
@@ -146,13 +169,19 @@ const markattendance = () => {
                     height: 50,
                     borderRadius: 8,
                     padding: 10,
-                    backgroundColor: item.status === "present" ? "#0E9F6E" : "#F05252",
+                    backgroundColor:
+                      item.status === "present" ? "#0E9F6E" : "#F05252",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
                   <Text
-                    style={{ fontSize: 16, color: "white", fontWeight: "bold", textTransform: "capitalize" }}
+                    style={{
+                      fontSize: 16,
+                      color: "white",
+                      fontWeight: "bold",
+                      textTransform: "capitalize",
+                    }}
                   >
                     {item.status.charAt(0)}
                   </Text>

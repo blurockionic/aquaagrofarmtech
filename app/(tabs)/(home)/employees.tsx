@@ -22,6 +22,7 @@ const Employees = () => {
     const fetchEmployeeData = async () => {
       try {
         const response = await axios.get(`${ApiUrl}/employee/all`);
+        
         const fetchedEmployees = response.data || []; // Fallback to an empty array if undefined
         setEmployees(fetchedEmployees);
       } catch (error) {
@@ -68,13 +69,10 @@ const Employees = () => {
             style={{ flex: 1 }}
             placeholder="Search"
           />
-
           {employees.length > 0 && (
-            <View className="hidden">
-              <Pressable onPress={() => router.push("/(home)/adddetails")}>
-                <AntDesign name="pluscircle" size={30} color="#0072b1" />
-              </Pressable>
-            </View>
+            <Pressable onPress={() => router.push("/(home)/adddetails")}>
+              <AntDesign name="pluscircle" size={30} color="#0072b1" />
+            </Pressable>
           )}
         </Pressable>
       </View>
@@ -83,12 +81,14 @@ const Employees = () => {
         <View>
           {employees
             .filter((employee) =>
-              employee.fullName.toLowerCase().includes(input.toLowerCase())
+              employee?.userId?.fullName
+                ?.toLowerCase()
+                .includes(input.toLowerCase())
             )
             .map((employee) => (
               <Pressable
                 key={employee._id}
-                onPress={() => router.push(`/employee/${employee._id}`)}
+                onPress={() => router.push(`/employee/${employee.userId._id}`)}
                 style={{
                   padding: 10,
                   borderBottomWidth: 1,
@@ -98,13 +98,13 @@ const Employees = () => {
                 <View className="p-4 flex flex-row items-center gap-4">
                   <View className="bg-blue-800 px-5 py-4 flex flex-row rounded-md">
                     <Text className="text-white text-lg">
-                      {employee.fullName.charAt(0)}
+                      {employee.userId.fullName.charAt(0)}
                     </Text>
                   </View>
                   <View className="flex flex-cols">
-                    <Text className="text-lg">{employee.fullName}</Text>
+                    <Text className="text-lg">{employee.userId.fullName}</Text>
                     <Text className="text-gray text-sm">
-                      {employee.role} ({employee._id})
+                      {employee.userId.role} ({employee.userId._id})
                     </Text>
                   </View>
                 </View>
@@ -118,7 +118,7 @@ const Employees = () => {
           <Image source={images.noResult} className="w-40 h-40" />
           <Text>No employees found</Text>
           <Text>Press on the plus button and add your Employee</Text>
-          <Pressable onPress={() => router.push("/(home)/adddetails")} disabled className="hidden">
+          <Pressable onPress={() => router.push("/(home)/adddetails")}>
             <AntDesign
               style={{ marginTop: 30 }}
               name="pluscircle"

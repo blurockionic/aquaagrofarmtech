@@ -177,6 +177,7 @@ export const updateDetails = async (req, res, next) => {
 
 // logout the user
 export const logout = async (req, res) => {
+  console.log("logout");
   res.clearCookie("token");
   return res.status(200).json({
     success: true,

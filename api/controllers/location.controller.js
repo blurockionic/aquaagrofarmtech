@@ -2,22 +2,57 @@ import Location from "../models/location.model.js";
 
 // Create a new location
 export const createLocation = async (req, res) => {
-  try {
-    const { userId, location } = req.body;
+  const userId = req.params.id; // Extract userId from request params
 
+  try {
+    const { location } = req.body;
+    console.log(userId);
+
+    // Validate userId
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "UserId is required and must be valid.",
+      });
+    }
+
+    // Validate location data
+    if (
+      !location ||
+      typeof location.latitude !== "number" ||
+      typeof location.longitude !== "number"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid location data. Please provide valid latitude and longitude.",
+      });
+    }
+
+    console.log("Location Data:", location);
+    console.log("UserId:", userId);
+
+    // Create a new location entry
     const newLocation = new Location({
       userId,
-      location,
+      location: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
     });
 
+    // Save to the database
     await newLocation.save();
-    res.status(201).json({
+
+    return res.status(201).json({
       success: true,
       message: "Location created successfully",
       data: newLocation,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Error creating location:", error.message);
+
+    return res.status(500).json({
       success: false,
       message: "Failed to create location",
       error: error.message,
@@ -46,7 +81,7 @@ export const getAllLocations = async (req, res) => {
 export const getLocationById = async (req, res) => {
   try {
     // Find a single location by clerk_id
-    const location = await Location.findOne({ userId: req.params.id });
+    const location = await Location.find({ userId: req.params.id });
 
     // Check if the location was found
     if (!location) {

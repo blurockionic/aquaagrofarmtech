@@ -65,16 +65,17 @@ const EmployeeDetails = (props: Props) => {
     phone: "",
     designation: "",
     address: "",
-    joiningDate: "",
     dateOfBirth: "",
     salary: 0,
   });
+
+  console.log(details, "details");
 
   // Function to fetch employee details
   useEffect(() => {
     const fetchEmployeeDetails = async () => {
       try {
-        const response = await axios.get(`${ApiUrl}/employee/${details}`); // Use the id to fetch employee data
+        const response = await axios.get(`${ApiUrl}/employee/${details}`);
         setEmployee(response.data.employee);
         setEmployeeId(response.data.employee.employeeId);
       } catch (error) {
@@ -156,20 +157,13 @@ const EmployeeDetails = (props: Props) => {
     if (details) {
       fetchUserDetails();
       fetchEmployeeDetails();
-      // fetchLoanAndAdvance();
+      fetchLoanAndAdvance();
     }
-    // if (employeeId) {
-    //   fetchAttendanceReoportById();
-    //   // fetchAttendanceReoportAdvanceOrLoan();
-    // }
+    if (details) {
+      fetchAttendanceReoportById();
+      // fetchAttendanceReoportAdvanceOrLoan();
+    }
   }, [details, employeeId, isLoading]);
-
-  if (!employee) {
-    return <Text>Loading...</Text>;
-  }
-
-
- 
 
   // Toggle section expansion
 
@@ -202,8 +196,8 @@ const EmployeeDetails = (props: Props) => {
 
     try {
       // Make the API call to submit the advance or loan amount
-      const response = await axios.post<ApiResponse>(`${ApiUrl}/advance/new`, {
-        employeeId: details, // Ensure you are passing the correct field
+      const response = await axios.post(`${ApiUrl}/advance/new`, {
+        userId: details, // Ensure you are passing the correct field
         advanceAmount: advanceAmount,
         date: moment().format("MMMM D, YYYY"),
       });
@@ -283,7 +277,14 @@ const EmployeeDetails = (props: Props) => {
     }
   };
 
-  const payableSalary = (attendance[0]?.present * attendance[0]?.salary) / 30;
+  //payable salary
+
+  const payableSalary =
+    attendance?.length > 0 &&
+    typeof attendance[0]?.present === "number" &&
+    typeof attendance[0]?.salary === "number"
+      ? (attendance[0].present * attendance[0].salary) / 30
+      : 0;
 
   //handle on edit
   const handleOnedit = () => {
@@ -296,14 +297,14 @@ const EmployeeDetails = (props: Props) => {
     console.log(formData);
     //WIP: update the details
     // await updateEmployeeDetails();
-    const response = await axios.put(
-      `${ApiUrl}/employee/update/${details}`, {
-        formData
-      }
-    )
+    const response = await axios.put(`${ApiUrl}/employee/update/${details}`, {
+      formData,
+    });
     console.log(response.data);
     setIsLoading(false);
   };
+
+  console.log(employee);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -507,7 +508,7 @@ const EmployeeDetails = (props: Props) => {
                   />
                 </View>
 
-                <View style={{ marginVertical: 10 }}>
+                {/* <View style={{ marginVertical: 10 }}>
                   <Text style={{ fontSize: 14, fontWeight: "bold" }}>
                     Date of Birth
                   </Text>
@@ -527,7 +528,7 @@ const EmployeeDetails = (props: Props) => {
                     placeholderTextColor={"black"}
                     editable={isEditClicked ? true : false} // Making the field non-editable
                   />
-                </View>
+                </View> */}
 
                 <View>
                   <Text style={{ fontSize: 14, fontWeight: "bold" }}>
@@ -649,7 +650,7 @@ const EmployeeDetails = (props: Props) => {
           {/* attendance  */}
           {selectedTab === "Attendance" && (
             <>
-              <AttendanceInCalender employeeId={employeeId} />
+              <AttendanceInCalender employeeId={details} />
             </>
           )}
 
@@ -736,7 +737,7 @@ const EmployeeDetails = (props: Props) => {
           )}
 
           {selectedTab === "Location" && (
-            <LocationOfEmployee employeeId={employee?.clerk_id} />
+            <LocationOfEmployee employeeId={details} />
           )}
 
           {/* //salary  */}
@@ -748,7 +749,7 @@ const EmployeeDetails = (props: Props) => {
                   {/* Table Row: Base Salary */}
                   <View className="flex flex-cols items-center justify-center py-2">
                     <Text>Base Salary</Text>
-                    <Text>₹ {attendance[0]?.salary || "----"}</Text>
+                    <Text>₹ {employee?.salary || "----"}</Text>
                   </View>
                 </View>
 

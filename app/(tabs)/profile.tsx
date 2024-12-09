@@ -46,10 +46,8 @@ const Profile = (props: Props) => {
 
   const logout = async () => {
     try {
-      // const response = await signOut();
-      // if (response) {
-      //   router.push("/login");
-      // }
+      const response = await axios.get(`${ApiUrl}/auth/logout`);
+      router.push("/(auth)/login");
     } catch (error) {
       console.error(error);
     }

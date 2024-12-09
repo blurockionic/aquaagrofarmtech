@@ -6,6 +6,8 @@ import {
   TextInput,
   Button,
   StyleSheet,
+  TouchableOpacity,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -14,23 +16,30 @@ import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import moment from "moment";
-import { red } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import trackUserLocation from "@/components/location/trackUserLocation";
 
 type Props = {};
 
 const Profile = (props: Props) => {
   const router = useRouter();
-  const [currentDate, setCurrentDate] = useState(moment());
   const [employee, setEmployee] = useState<any>({});
+  const [employeeDetails, setEmployeeDetails] = useState<any>({});
+  const [isEditClicked, setIsEditClicked] = useState(false);
+  const [formData, setFormData] = useState({
+    phone: "",
+    designation: "",
+    address: "",
+    joiningDate: "",
+    dateOfBirth: "",
+    salary: 0,
+  });
 
   const getUserData = async () => {
     try {
       const userData = await AsyncStorage.getItem("user");
-      if (userData !== null) {
-        // Parse the user data from JSON string to an object
+      if (userData) {
         const user = JSON.parse(userData);
-        console.log("Retrieved user data:", user);
         setEmployee(user);
       } else {
         console.log("No user data found.");
@@ -40,269 +49,222 @@ const Profile = (props: Props) => {
     }
   };
 
+  const fetchEmployeeDetails = async () => {
+    if (!employee?.id) return;
+    try {
+      const response = await axios.get(`${ApiUrl}/employee/${employee.id}`);
+      setEmployeeDetails(response.data.employee || {});
+      setFormData({
+        phone: response.data.employee.phone || "",
+        designation: response.data.employee.designation || "",
+        address: response.data.employee.address || "",
+        joiningDate: response.data.employee.joiningDate || "",
+        dateOfBirth: response.data.employee.dateOfBirth || "",
+        salary: response.data.employee.salary || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching employee details:", error);
+    }
+  };
+
+  const handleOnUpdate = async () => {
+    console.log(formData);
+    console.log("id", employee.id);
+    try {
+      setIsEditClicked(false);
+      await axios.put(`${ApiUrl}/employee/update/${employee.id}`, formData);
+      Alert.alert("Updated Successfully");
+      fetchEmployeeDetails();
+    } catch (error) {
+      console.error("Error updating employee details:", error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+      router.push("/login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const handleOnEdit = () => {
+    setIsEditClicked(true);
+  };
+
   useEffect(() => {
     getUserData();
   }, []);
 
-  const logout = async () => {
-    try {
-      // const response = await signOut();
-      // if (response) {
-      //   router.push("/login");
-      // }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  useEffect(() => {
+    if (employee?.id) fetchEmployeeDetails();
+  }, [employee]);
 
+  trackUserLocation(employee);
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={styles.rootView}>
       <ScrollView>
         {/* Header */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingRight: 20,
-          }}
-        >
-          <View
-            style={{
-              padding: 16,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <View
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 8,
-                backgroundColor: "#4b6cb7",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ color: "white", fontSize: 16 }}>
-                {employee?.fullName?.charAt(0)}
+        <View style={styles.headerContainer}>
+          <View style={styles.profileContainer}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {employee?.fullName?.charAt(0) || "N/A"}
               </Text>
             </View>
             <View>
-              <Text style={{ fontSize: 18 }}>{employee?.fullName}</Text>
-              <Text style={{ color: "gray", fontSize: 12 }}>
-                {employee?.role} ({employee?.id})
+              <Text style={styles.employeeName}>
+                {employee?.fullName || "N/A"}
+              </Text>
+              <Text style={styles.employeeRole}>
+                {employee?.role || "Role"} ({employee?.id || "ID"})
               </Text>
             </View>
           </View>
-          <Ionicons name="settings-outline" size={24} color="black" />
+        </View>
+
+        {/* Login Credentials */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Login Credential</Text>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="black"
+            value={employee?.email || ""}
+            editable={false}
+          />
         </View>
 
         {/* Employee Details Section */}
-        <View style={{ padding: 16 }}>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: "#D0D0D0",
-              borderRadius: 10,
-              padding: 15,
-            }}
-          >
-            <Text
-              style={{ textAlign: "center", fontSize: 14, fontWeight: "bold" }}
-            >
-              Login Credential
-            </Text>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>Email</Text>
-            <TextInput
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="email"
-              placeholderTextColor="black"
-              value={employee?.email}
-              editable={false}
-            />
-          </View>
-
-          {/* Other details */}
-          {/* <View
-            style={{
-              borderWidth: 1,
-              borderColor: "#D0D0D0",
-              borderRadius: 10,
-              padding: 15,
-              marginTop: 20,
-            }}
-          >
-            <Text
-              style={{ textAlign: "center", fontSize: 14, fontWeight: "bold" }}
-            >
-              Employee Details
-            </Text>
-
-            {/* Full Name */}
-          {/* <View style={{ marginVertical: 14 }}>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>Full Name</Text>
-            <TextInput
-              value={employee?.employeeName}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Enter your full name"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-
-          {/* Employee Id */}
-          {/* <View>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-              Employee Id
-            </Text>
-            <TextInput
-              value={employee?.employeeId}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Employee Id"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-
-          {/* Designation */}
-          {/* <View style={{ marginVertical: 10 }}>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-              Designation
-            </Text>
-            <TextInput
-              value={employee?.designation}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Designation"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-
-          {/* Mobile Number */}
-          {/* <View>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-              Mobile Number
-            </Text>
-            <TextInput
-              value={employee?.phoneNumber}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Mobile No"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-
-          {/* Other details */}
-          {/* <View style={{ marginVertical: 10 }}>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-              Date of Birth
-            </Text>
-            <TextInput
-              value={employee?.dateOfBirth}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Enter Date of Birth"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-
-          {/* <View style={{ marginVertical: 10 }}>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>
-              Joining Date
-            </Text>
-            <TextInput
-              value={employee?.joiningDate}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Joining Date"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-          {/* 
-            <View style={{ marginVertical: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: "bold" }}>Salary</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Employee Details</Text>
+          {[
+            {
+              label: "Full Name",
+              value: employee?.fullName,
+              editable: false,
+            },
+            { label: "Employee ID", value: employee?.id, editable: false },
+            {
+              label: "Designation",
+              value: formData.designation,
+              key: "designation",
+            },
+            { label: "Mobile Number", value: formData.phone, key: "phone" },
+            {
+              label: "Date of Birth",
+              value: formData.dateOfBirth,
+              key: "dateOfBirth",
+            },
+            {
+              label: "Joining Date",
+              value: formData.joiningDate,
+              key: "joiningDate",
+            },
+            {
+              label: "Salary",
+              value: formData.salary.toString(),
+              key: "salary",
+            },
+            { label: "Address", value: formData.address, key: "address" },
+          ].map((field, index) => (
+            <View key={index} style={styles.fieldContainer}>
+              <Text style={styles.label}>{field.label}</Text>
               <TextInput
-                value={employee?.salary}
-                style={{
-                  padding: 10,
-                  borderColor: "#D0D0D0",
-                  borderWidth: 1,
-                  marginTop: 10,
-                  borderRadius: 5,
-                }}
-                placeholder="Enter Salary"
+                style={styles.input}
+                value={field.value || ""}
+                onChangeText={(e) =>
+                  field.key && setFormData({ ...formData, [field.key]: e })
+                }
+                placeholder={`Enter ${field.label}`}
                 placeholderTextColor="black"
-                editable={false}
+                editable={isEditClicked && field.key ? true : field.editable}
               />
-            </View> */}
+            </View>
+          ))}
 
-          {/* <View>
-            <Text style={{ fontSize: 14, fontWeight: "bold" }}>Address</Text>
-            <TextInput
-              value={employee?.address}
-              style={{
-                padding: 10,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                marginTop: 10,
-                borderRadius: 5,
-              }}
-              placeholder="Enter Address"
-              placeholderTextColor="black"
-              editable={false}
-            />
-          </View> */}
-          {/* </View> */}
-          <View style={{ marginTop: 50, marginBottom: 100 }}>
-            <Button title="Logout" onPress={() => logout()} color="red" />
+          <View style={styles.activeEmployeeRow}>
+            <Text>Active Employee</Text>
+            <Text>{employee?.isActive ? "True" : "False"}</Text>
           </View>
+        </View>
+
+        {/* Edit or Save Button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={isEditClicked ? handleOnUpdate : handleOnEdit}
+        >
+          <Text style={styles.buttonText}>
+            {isEditClicked ? "Save" : "Edit"}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Logout Button */}
+        <View style={styles.logoutContainer}>
+          <Button title="Logout" onPress={handleLogout} color="red" />
         </View>
       </ScrollView>
     </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({
+  rootView: { flex: 1 },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  profileContainer: { flexDirection: "row", alignItems: "center", gap: 16 },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: "#4b6cb7",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarText: { color: "white", fontSize: 16 },
+  employeeName: { fontSize: 18 },
+  employeeRole: { color: "gray", fontSize: 12 },
+  section: {
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#D0D0D0",
+    borderRadius: 10,
+    marginTop: 20,
+  },
+  sectionTitle: {
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  label: { fontSize: 14, fontWeight: "bold", marginTop: 10 },
+  input: {
+    padding: 10,
+    borderColor: "#D0D0D0",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  fieldContainer: { marginVertical: 10 },
+  activeEmployeeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: "#4b6cb7",
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 16,
+    marginTop: 10,
+  },
+  buttonText: { color: "white", textAlign: "center" },
+  logoutContainer: { marginTop: 50, marginBottom: 100, marginHorizontal: 16 },
+});
 
 export default Profile;
