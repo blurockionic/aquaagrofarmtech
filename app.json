@@ -1,3 +1,5 @@
+
+
 {
   "expo": {
     "name": "aaf",
@@ -17,7 +19,7 @@
       "supportsTablet": true,
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBMB80FAkM8Z21L3lNaWfxeI6QOBVUolAE"
+          "apiKey": process.env.GOOGLE_MAPS_API_KEY,
         }
       },
       "infoPlist": {
@@ -39,7 +41,7 @@
       "newArchEnabled": true,
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyBMB80FAkM8Z21L3lNaWfxeI6QOBVUolAE"
+          "apiKey": process.env.GOOGLE_MAPS_API_KEY,
         }
       },
       "package": "com.blurockionic.aaf"

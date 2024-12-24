@@ -25,6 +25,7 @@
     "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
     "expo": "~52.0.20",
     "expo-constants": "~17.0.3",
     "expo-dev-client": "~5.0.6",
