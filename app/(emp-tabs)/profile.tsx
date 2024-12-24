@@ -18,11 +18,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import trackUserLocation from "@/components/location/trackUserLocation";
+import useLocation from "@/hooks/useLocation";
 
 type Props = {};
 
 const Profile = (props: Props) => {
   const router = useRouter();
+  const { latitude, longitude, errorMsg } = useLocation();
   const [employee, setEmployee] = useState<any>({});
   const [employeeDetails, setEmployeeDetails] = useState<any>({});
   const [isEditClicked, setIsEditClicked] = useState(false);
@@ -34,6 +36,34 @@ const Profile = (props: Props) => {
     dateOfBirth: "",
     salary: 0,
   });
+
+  useEffect(() => {
+    if (latitude && longitude && employee?.id) {
+      const intervalId = setInterval(() => {
+        updateLocationOnServer(employee.id, latitude, longitude);
+      }, 60000); // 1 second interval
+
+      return () => clearInterval(intervalId); // Cleanup on unmount
+    }
+  }, [latitude, longitude, employee?.id]);
+
+  const updateLocationOnServer = async (
+    userId: string,
+    latitude: number,
+    longitude: number
+  ) => {
+    try {
+      const response = await axios.post(`${ApiUrl}/location/create/${userId}`, {
+        location: {
+          latitude: latitude,
+          longitude: longitude,
+        },
+      });
+      console.log("Location updated to server successfully", response.data);
+    } catch (error) {
+      console.error("Error updating location on server", error);
+    }
+  };
 
   const getUserData = async () => {
     try {
@@ -68,8 +98,6 @@ const Profile = (props: Props) => {
   };
 
   const handleOnUpdate = async () => {
-    console.log(formData);
-    console.log("id", employee.id);
     try {
       setIsEditClicked(false);
       await axios.put(`${ApiUrl}/employee/update/${employee.id}`, formData);
@@ -82,8 +110,9 @@ const Profile = (props: Props) => {
 
   const handleLogout = async () => {
     try {
+      const response = await axios.get(`${ApiUrl}/auth/logout`);
       await AsyncStorage.removeItem("user");
-      router.push("/login");
+      router.push("/(auth)/sign-in");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -102,6 +131,7 @@ const Profile = (props: Props) => {
   }, [employee]);
 
   trackUserLocation(employee);
+
   return (
     <GestureHandlerRootView style={styles.rootView}>
       <ScrollView>

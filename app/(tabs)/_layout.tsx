@@ -29,23 +29,23 @@ export default function TabLayout() {
             />
           ),
           // Adding the logout button on the right of the header
-          headerRight: ({ color, focused }) => (
-            <Pressable
-              onPress={() => {
-                // Add your logout logic here, for example:
-                // signOut function or clearing authentication tokens
-                router.replace("/(auth)/sign-in");
-              }}
-              style={{
-                marginRight: 16,
-              }}
-            >
-              <TabBarIcon
-                name={focused ? "log-out" : "log-out-outline"}
-                color={color}
-              />
-            </Pressable>
-          ),
+          // headerRight: ({ color, focused }) => (
+          //   <Pressable
+          //     onPress={() => {
+          //       // Add your logout logic here, for example:
+          //       // signOut function or clearing authentication tokens
+          //       router.replace("/(auth)/sign-in");
+          //     }}
+          //     style={{
+          //       marginRight: 16,
+          //     }}
+          //   >
+          //     <TabBarIcon
+          //       name={focused ? "log-out" : "log-out-outline"}
+          //       color={color}
+          //     />
+          //   </Pressable>
+          // ),
         }}
       />
       <Tabs.Screen

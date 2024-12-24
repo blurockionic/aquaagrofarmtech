@@ -11,6 +11,7 @@ import CustomButton from "@/components/button/CustomButton";
 
 const SignUp = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -25,6 +26,7 @@ const SignUp = () => {
   });
 
   const onSignUpPress = async () => {
+    setLoading(true);
     try {
       try {
         //check email added by owner or not
@@ -35,7 +37,7 @@ const SignUp = () => {
         });
 
         router.push("/sign-in");
-       
+
         // Alert.alert(response.data.message);
       } catch (error: any) {
         console.error(
@@ -50,6 +52,8 @@ const SignUp = () => {
       // Prepare email address verification
     } catch (err: any) {
       Alert.alert("Error", err.errors[0].longMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,7 +103,8 @@ const SignUp = () => {
             }
           />
           <CustomButton
-            title="Sign Up"
+            title={loading ? "Please wait..." : "Sign In"}
+            disabled={loading}
             onPress={onSignUpPress}
             style={styles.button}
           />

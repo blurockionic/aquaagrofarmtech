@@ -2,6 +2,8 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "jsx": "react-native",          // Ensure JSX is supported
+    "allowJs": true,               // Allow JavaScript files
     "paths": {
       "@/*": [
         "./*"
@@ -12,6 +14,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "redux/user/userSlice.js", "redux/store.js"  ]
+    "expo-env.d.ts",
+    "redux/user/userSlice.js", 
+    "redux/store.js"
+  ]
 }

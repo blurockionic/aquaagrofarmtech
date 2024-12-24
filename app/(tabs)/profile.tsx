@@ -47,7 +47,8 @@ const Profile = (props: Props) => {
   const logout = async () => {
     try {
       const response = await axios.get(`${ApiUrl}/auth/logout`);
-      router.push("/(auth)/login");
+      await AsyncStorage.removeItem("user");
+      router.push("/(auth)/sign-in");
     } catch (error) {
       console.error(error);
     }

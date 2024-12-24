@@ -1,5 +1,5 @@
 import express from "express";
-import { getProfile, login, logout, registration, updateDetails, verifyEmail } from "../controllers/auth.controller.js";
+import { deleteProfile, getProfile, login, logout, registration, updateDetails, verifyEmail } from "../controllers/auth.controller.js";
 
 
 const router = express.Router();
@@ -20,6 +20,9 @@ router.get("/me/:id", getProfile)
 
 // endpoint for verify email
 router.post("/verify", verifyEmail)
+
+//endponint for delete email 
+router.delete("/delete/:id", deleteProfile)
 
 
 export default router

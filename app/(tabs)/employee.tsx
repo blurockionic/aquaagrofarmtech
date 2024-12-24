@@ -31,7 +31,6 @@ const Employees = () => {
     fetchEmployeeData(); // Trigger the fetch function
   }, []);
 
-  console.log(employees);
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -69,13 +68,13 @@ const Employees = () => {
           />
 
           {/* Add employee button only visible when there are employees */}
-          {employees.length > 0 && (
+          {/* {employees.length > 0 && (
             <View>
               <Pressable onPress={() => router.push("/(home)/adddetails")}>
                 <AntDesign name="pluscircle" size={30} color="#0072b1" />
               </Pressable>
             </View>
-          )}
+          )} */}
         </Pressable>
       </View>
 
@@ -124,14 +123,14 @@ const Employees = () => {
           <Text>No employees found</Text>
           <Text>Press on the plus button and add your Employee</Text>
           {/* Add employee button */}
-          <Pressable onPress={() => router.push("/(home)/adddetails")}>
+          {/* <Pressable onPress={() => router.push("/(home)/adddetails")}>
             <AntDesign
               style={{ marginTop: 30 }}
               name="pluscircle"
               size={40}
               color="black"
             />
-          </Pressable>
+          </Pressable> */}
         </View>
       )}
     </View>

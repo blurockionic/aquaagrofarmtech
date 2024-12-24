@@ -69,12 +69,12 @@ const Employees = () => {
             style={{ flex: 1 }}
             placeholder="Search"
           />
-          {employees.length > 0 && (
+          {/* {employees.length > 0 && (
             <Pressable onPress={() => router.push("/(home)/adddetails")}>
               <AntDesign name="pluscircle" size={30} color="#0072b1" />
             </Pressable>
-          )}
-        </Pressable>
+          // )}*/}
+        </Pressable> 
       </View>
 
       {employees.length > 0 ? (
@@ -118,14 +118,14 @@ const Employees = () => {
           <Image source={images.noResult} className="w-40 h-40" />
           <Text>No employees found</Text>
           <Text>Press on the plus button and add your Employee</Text>
-          <Pressable onPress={() => router.push("/(home)/adddetails")}>
+          {/* <Pressable onPress={() => router.push("/(home)/adddetails")}>
             <AntDesign
               style={{ marginTop: 30 }}
               name="pluscircle"
               size={40}
               color="black"
             />
-          </Pressable>
+          </Pressable> */}
         </View>
       )}
     </View>

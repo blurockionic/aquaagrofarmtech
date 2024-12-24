@@ -1,7 +1,8 @@
 import CustomButton from "@/components/button/CustomButton";
 import { onboarding } from "@/constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from "react-native-swiper";
@@ -10,6 +11,35 @@ const Onboarding = () => {
   const swiperRef = useRef<Swiper>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const isLastSlide = activeIndex === onboarding.length - 1;
+  const [user, setUser] = useState<any>(null);
+
+  const getUserData = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("user");
+      if (userData !== null) {
+        // Parse the user data from JSON string to an object
+        const user = JSON.parse(userData);
+        setUser(user);
+      } else {
+        console.log("No user data found.");
+      }
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
+
+  console.log(user);
+
+  if (user?.role === "admin") {
+    router.push("/(tabs)/home");
+  } else {
+    router.push("/(emp-tabs)/salary");
+  }
+
   return (
     <SafeAreaView className="flex h-full items-center justify-between bg-white">
       <TouchableOpacity

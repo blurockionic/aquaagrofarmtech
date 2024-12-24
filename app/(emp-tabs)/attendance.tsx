@@ -17,9 +17,11 @@ import AttendanceInCalender from "@/components/attendance/AttendanceInCalender";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import trackUserLocation from "@/components/location/trackUserLocation";
+import useLocation from "@/hooks/useLocation";
 
 const Attendance = () => {
   const [employeeId, setEmployeeId] = useState("");
+  const { latitude, longitude, errorMsg } = useLocation();
   const [employees, setEmployees] = useState([]); // Initialize as an array
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -40,8 +42,35 @@ const Attendance = () => {
       fetchEmployeeDetails();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (latitude && longitude && user?.id) {
+      const intervalId = setInterval(() => {
+        updateLocationOnServer(user.id, latitude, longitude);
+      }, 60000); 
+
+      return () => clearInterval(intervalId); // Cleanup on unmount
+    }
+  }, [latitude, longitude, user?.id]);
+
+  const updateLocationOnServer = async (
+    userId: string,
+    latitude: number,
+    longitude: number
+  ) => {
+    try {
+      const response = await axios.post(`${ApiUrl}/location/create/${userId}`, {
+        location: {
+          latitude: latitude,
+          longitude: longitude,
+        },
+      });
+      console.log("Location updated to server successfully", response.data);
+    } catch (error) {
+      console.error("Error updating location on server", error);
+    }
+  };
   
-  trackUserLocation(user);
   const fetchEmployeeDetails = async () => {
     try {
       const response = await axios.get(`${ApiUrl}/employee/${user.id}`);

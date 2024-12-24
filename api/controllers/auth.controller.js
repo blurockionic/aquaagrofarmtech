@@ -80,13 +80,12 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Email already exist! Please login!",
+        message: "Email not found! Please login!",
       });
     }
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(isMatch, "woking");
     if (!isMatch) {
       return res.status(400).json({
         success: false,
@@ -95,13 +94,9 @@ export const login = async (req, res) => {
     }
 
     // Generate a JSON Web Token (JWT)
-    const token = jwt.sign(
-      { _id: user._id },
-      process.env.JWT_SECRET || "your_jwt_secret", // Ensure you have a secure secret key
-      {
-        expiresIn: "3d", // Token expires in 3 days
-      }
-    );
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "3d", // Token expires in 3 days
+    });
 
     // Return success response with token and user details
     return res.status(200).json({
@@ -190,6 +185,18 @@ export const getProfile = async (req, res) => {
     console.log(req.params.id);
     const user = await Auth.findOne({ _id: req.params.id });
     res.status(200).json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const deleteProfile = async (req, res) => {
+  try {
+    const user = await Auth.findByIdAndDelete(req.params.id);
+    res
+      .status(200)
+      .json({ success: true, message: "User deleted successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });

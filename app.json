@@ -15,6 +15,11 @@
     },
     "ios": {
       "supportsTablet": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBMB80FAkM8Z21L3lNaWfxeI6QOBVUolAE"
+        }
+      },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show your position."
       },
@@ -31,8 +36,13 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "package": "com.biruly.aaf",
-      "newArchEnabled": true
+      "newArchEnabled": true,
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBMB80FAkM8Z21L3lNaWfxeI6QOBVUolAE"
+        }
+      },
+      "package": "com.blurockionic.aaf"
     },
     "web": {
       "bundler": "metro",
@@ -58,7 +68,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "cc24dad4-65e3-49ad-916a-95c68e1dfb70"
+        "projectId": "e762814e-320f-4a2e-83ca-ba681170ba75"
       }
     }
   }

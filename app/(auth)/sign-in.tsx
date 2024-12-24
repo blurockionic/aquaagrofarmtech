@@ -8,16 +8,19 @@ import CustomButton from "@/components/button/CustomButton";
 import { ApiUrl } from "@/config/ServerConnection";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 
 const SignIn = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
-  });
+  }); 
+  
 
   const onSignInPress = async () => {
+    setLoading(true);
     try {
       // Validate input
       if (!form.email || !form.password) {
@@ -40,7 +43,10 @@ const SignIn = () => {
         await SecureStore.setItemAsync("userToken", response.data.token);
         // Optionally store the user data
         await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-        await SecureStore.setItemAsync("user",JSON.stringify(response.data.user));
+        await SecureStore.setItemAsync(
+          "user",
+          JSON.stringify(response.data.user)
+        );
 
         // You can navigate to the next screen after successful login
         Alert.alert("Success", response.data.message);
@@ -59,6 +65,8 @@ const SignIn = () => {
         "Error",
         error.response?.data?.message || "An error occurred during login"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,7 +107,8 @@ const SignIn = () => {
               }
             />
             <CustomButton
-              title="Sign In"
+              title={loading ? "Please wait..." : "Sign In"}
+              disabled={loading}
               onPress={onSignInPress}
               className="mt-6"
             />

@@ -1,19 +1,20 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { ApiUrl } from "@/config/ServerConnection";
-import { useUser } from "@clerk/clerk-expo";
 import moment from "moment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import useLocation from "@/hooks/useLocation";
+import trackUserLocation from "@/components/location/trackUserLocation";
 
 type Props = {};
 
 const Salary = (props: Props) => {
+  const { latitude, longitude, errorMsg } = useLocation();
   // const { user } = useUser();
   const [advanceOrLoan, setAdvanceOrLoan] = React.useState<any>([]);
   const [totalAdvanceAmount, setTotalAdvanceAmount] = React.useState<any>(0);
-  const [employeeId, setEmployeeId] = React.useState<any>("");
+  const [employeeDetails, setEmployeeDetails] = React.useState<any>("");
   const [extraBonus, setExtraBonus] = React.useState<any>([]);
   const [currentDate, setCurrentDate] = React.useState<any>(moment());
   const [attendanceReport, setAttendanceReport] = React.useState<any>([]);
@@ -27,7 +28,6 @@ const Salary = (props: Props) => {
       if (userData !== null) {
         // Parse the user data from JSON string to an object
         const user = JSON.parse(userData);
-        console.log("Retrieved user data:", user);
         setEmployee(user);
       } else {
         console.log("No user data found.");
@@ -41,23 +41,27 @@ const Salary = (props: Props) => {
     getUserData();
   }, []);
 
-
   useEffect(() => {
     if (employee.id) {
       fetchEmployeeDetails();
-    //   fetchLoanAndAdvance();
-     
+      fetchLoanAndAdvance();
+      fetchAttendanceReoportById();
     }
-
-    // if(anotherEmployeeId){
-    //   fetchAttendanceReoportById()
-    // }
-    // console.log("employeeId", employeeId);
   }, [employee.id]);
+
+  useEffect(() => {
+    if (latitude && longitude && employee?.id) {
+      const intervalId = setInterval(() => {
+        updateLocationOnServer(employee.id, latitude, longitude);
+      }, 60000); // 1 second interval
+
+      return () => clearInterval(intervalId); // Cleanup on unmount
+    }
+  }, [latitude, longitude, employee?.id]);
 
   const fetchLoanAndAdvance = async () => {
     try {
-      const response = await axios.get(`${ApiUrl}/advance/${employeeId}`);
+      const response = await axios.get(`${ApiUrl}/advance/${employee.id}`);
       // Filter out the details and set the advance or loan
       const advance = response.data.advance.filter((item: any) =>
         item.hasOwnProperty("advanceAmount")
@@ -84,9 +88,8 @@ const Salary = (props: Props) => {
       const response = await axios.get(`${ApiUrl}/employee/${employee.id}`); // Use the id to fetch employee data
 
       setAnotherEmployeeId(response.data.employee);
-      console.log(response.data);
 
-      // setEmployeeId(response.data?.employee[0]._id);
+      setEmployeeDetails(response.data?.employee);
     } catch (error) {
       console.error("Error fetching employee details:", error);
     }
@@ -95,11 +98,11 @@ const Salary = (props: Props) => {
   const fetchAttendanceReoportById = async () => {
     try {
       const response = await axios.get(
-        `${ApiUrl}/attendance/report/${anotherEmployeeId}`,
+        `${ApiUrl}/attendance/report/${employee.id}`,
         {
           params: {
             month: currentDate.month() + 1,
-            year: 2024,
+            year: moment().year(),
           },
         }
       );
@@ -109,18 +112,33 @@ const Salary = (props: Props) => {
     }
   };
 
-
   //calculate payable salary
-  const payableSalary =
-  attendanceReport?.[0]?.present && attendanceReport?.[0]?.salary
-    ? (attendanceReport[0].present * attendanceReport[0].salary) / 30
+  const payableSalary = attendanceReport?.[0]?.present
+    ? (attendanceReport[0].present * anotherEmployeeId.salary) / 30
     : 0;
 
-console.log("payableSalary", payableSalary);
-
+  // Function to update location on server
+  const updateLocationOnServer = async (
+    userId: string,
+    latitude: number,
+    longitude: number
+  ) => {
+    try {
+      const response = await axios.post(`${ApiUrl}/location/create/${userId}`, {
+        location: {
+          latitude: latitude,
+          longitude: longitude,
+        },
+      });
+      console.log("Location updated to server successfully", response.data);
+    } catch (error) {
+      console.error("Error updating location on server", error);
+    }
+  };
+  
 
   return (
-    <>
+    <>  
       <View className="mx-5 p-4 bg-white rounded-md shadow-md mt-5">
         <View className=" bg-white rounded-lg shadow">
           <View className="flex flex-row items-center justify-between mb-4">
