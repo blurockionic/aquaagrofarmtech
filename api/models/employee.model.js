@@ -9,7 +9,7 @@ const employeeSchema = new mongoose.Schema(
     designation: {
       type: String,
       trim: true, // Removes extra spaces
-      required: [true, "Designation is required"], // Makes this field mandatory
+      default : "employee",
     },
     joiningDate: {
       type: String, // Use Date type for better date manipulation

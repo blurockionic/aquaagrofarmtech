@@ -31,6 +31,8 @@ const Employees = () => {
     fetchEmployeeData(); // Trigger the fetch function
   }, []);
 
+  console.log(employees);
+
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>

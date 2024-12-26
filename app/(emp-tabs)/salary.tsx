@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ApiUrl } from "@/config/ServerConnection";
@@ -53,7 +53,7 @@ const Salary = (props: Props) => {
     if (latitude && longitude && employee?.id) {
       const intervalId = setInterval(() => {
         updateLocationOnServer(employee.id, latitude, longitude);
-      }, 60000); // 1 second interval
+      }, 60000); 
 
       return () => clearInterval(intervalId); // Cleanup on unmount
     }
@@ -135,114 +135,115 @@ const Salary = (props: Props) => {
       console.error("Error updating location on server", error);
     }
   };
-  
 
   return (
-    <>  
-      <View className="mx-5 p-4 bg-white rounded-md shadow-md mt-5">
-        <View className=" bg-white rounded-lg shadow">
-          <View className="flex flex-row items-center justify-between mb-4">
-            <Text className="text-lg font-bold mb-3">Salary Details</Text>
-            {/* Table Row: Base Salary */}
-            <View className="flex flex-cols items-center justify-center py-2">
-              <Text>Base Salary</Text>
-              <Text>₹ {anotherEmployeeId.salary || "----"}</Text>
+    <>
+      <ScrollView>
+        <View className="mx-5 p-4 bg-white rounded-md shadow-md mt-5">
+          <View className=" bg-white rounded-lg shadow">
+            <View className="flex flex-row items-center justify-between mb-4">
+              <Text className="text-lg font-bold mb-3">Salary Details</Text>
+              {/* Table Row: Base Salary */}
+              <View className="flex flex-cols items-center justify-center py-2">
+                <Text>Base Salary</Text>
+                <Text>₹ {anotherEmployeeId.salary || "----"}</Text>
+              </View>
+            </View>
+
+            {/* Table Header */}
+            <View className="flex flex-row justify-between mb-2">
+              <Text className="font-bold">Description</Text>
+              <Text className="font-bold">Value/Amt.</Text>
+            </View>
+
+            {/* Table Row: Number of Working Days */}
+            <View className="flex flex-row justify-between border-b border-gray-200 py-2">
+              <Text>Number of Working Days</Text>
+              <Text>{attendanceReport[0]?.present || "----"}</Text>
+            </View>
+
+            {/* Table Row: Current Salary */}
+            <View className="flex flex-row justify-between border-b border-gray-200 py-2">
+              <Text>Salary payable</Text>
+              <Text>₹ {payableSalary.toFixed(2) || "----"}</Text>
+            </View>
+
+            {/* Table Row: Advance Amount */}
+            <View className="flex flex-row justify-between border-b border-gray-200 py-2">
+              <Text>Advance Amount</Text>
+              <Text>₹ {totalAdvanceAmount || "----"}</Text>
+            </View>
+
+            {/* Table Row: Due Amount */}
+            <View className="flex flex-row justify-between py-2">
+              <Text>Due Amount</Text>
+              <Text>
+                ₹{" "}
+                {(totalAdvanceAmount >= payableSalary
+                  ? totalAdvanceAmount - payableSalary
+                  : 0
+                ).toFixed(2) || "----"}
+              </Text>
             </View>
           </View>
-
-          {/* Table Header */}
-          <View className="flex flex-row justify-between mb-2">
-            <Text className="font-bold">Description</Text>
-            <Text className="font-bold">Value/Amt.</Text>
-          </View>
-
-          {/* Table Row: Number of Working Days */}
-          <View className="flex flex-row justify-between border-b border-gray-200 py-2">
-            <Text>Number of Working Days</Text>
-            <Text>{attendanceReport[0]?.present || "----"}</Text>
-          </View>
-
-          {/* Table Row: Current Salary */}
-          <View className="flex flex-row justify-between border-b border-gray-200 py-2">
-            <Text>Salary payable</Text>
-            <Text>₹ {payableSalary.toFixed(2) || "----"}</Text>
-          </View>
-
-          {/* Table Row: Advance Amount */}
-          <View className="flex flex-row justify-between border-b border-gray-200 py-2">
-            <Text>Advance Amount</Text>
-            <Text>₹ {totalAdvanceAmount || "----"}</Text>
-          </View>
-
-          {/* Table Row: Due Amount */}
-          <View className="flex flex-row justify-between py-2">
-            <Text>Due Amount</Text>
-            <Text>
-              ₹{" "}
-              {(totalAdvanceAmount >= payableSalary
-                ? totalAdvanceAmount - payableSalary
-                : 0
-              ).toFixed(2) || "----"}
-            </Text>
-          </View>
         </View>
-      </View>
 
-      <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-5 mt-5">
-        <View className="flex flex-row items-center justify-between mb-5">
-          <Text className="text-lg font-bold ">Advance</Text>
+        <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-5 mt-5">
+          <View className="flex flex-row items-center justify-between mb-5">
+            <Text className="text-lg font-bold ">Advance</Text>
+          </View>
+          {advanceOrLoan.length > 0 ? (
+            advanceOrLoan.map((item: any, index: number) => (
+              <View
+                key={index}
+                style={{ marginVertical: 2 }}
+                className="p-2 border-b border-gray-100"
+              >
+                {item?.advanceOrLoan !== 0 ? (
+                  <>
+                    <View className="flex flex-row items-center justify-between">
+                      <Text>{`₹${item?.advanceAmount}`}</Text>
+                      <Text>{item?.date}</Text>
+                    </View>
+                  </>
+                ) : (
+                  <Text>No loan or advance</Text>
+                )}
+              </View>
+            ))
+          ) : (
+            <Text>No Advance</Text>
+          )}
         </View>
-        {advanceOrLoan.length > 0 ? (
-          advanceOrLoan.map((item: any, index: number) => (
-            <View
-              key={index}
-              style={{ marginVertical: 2 }}
-              className="p-2 border-b border-gray-100"
-            >
-              {item?.advanceOrLoan !== 0 ? (
-                <>
-                  <View className="flex flex-row items-center justify-between">
-                    <Text>{`₹${item?.advanceAmount}`}</Text>
-                    <Text>{item?.date}</Text>
-                  </View>
-                </>
-              ) : (
-                <Text>No loan or advance</Text>
-              )}
-            </View>
-          ))
-        ) : (
-          <Text>No Advance</Text>
-        )}
-      </View>
 
-      <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-5 mt-5">
-        <View className="flex flex-row items-center justify-between mb-5">
-          <Text className="text-lg font-bold ">Extra Bonus</Text>
+        <View className="mx-5 p-4 bg-white rounded-md shadow-md mb-5 mt-5">
+          <View className="flex flex-row items-center justify-between mb-5">
+            <Text className="text-lg font-bold ">Extra Bonus</Text>
+          </View>
+          {extraBonus.length > 0 ? (
+            extraBonus.map((item, index) => (
+              <View
+                key={index}
+                style={{ marginVertical: 2 }}
+                className="p-2 border-b border-gray-100"
+              >
+                {item?.advanceOrLoan !== 0 ? (
+                  <>
+                    <View className="flex flex-row items-center justify-between">
+                      <Text>{`₹${item?.advanceAmount}`}</Text>
+                      <Text>{item?.date}</Text>
+                    </View>
+                  </>
+                ) : (
+                  <Text>No loan or advance</Text>
+                )}
+              </View>
+            ))
+          ) : (
+            <Text>No Advance</Text>
+          )}
         </View>
-        {extraBonus.length > 0 ? (
-          extraBonus.map((item, index) => (
-            <View
-              key={index}
-              style={{ marginVertical: 2 }}
-              className="p-2 border-b border-gray-100"
-            >
-              {item?.advanceOrLoan !== 0 ? (
-                <>
-                  <View className="flex flex-row items-center justify-between">
-                    <Text>{`₹${item?.advanceAmount}`}</Text>
-                    <Text>{item?.date}</Text>
-                  </View>
-                </>
-              ) : (
-                <Text>No loan or advance</Text>
-              )}
-            </View>
-          ))
-        ) : (
-          <Text>No Advance</Text>
-        )}
-      </View>
+      </ScrollView>
     </>
   );
 };

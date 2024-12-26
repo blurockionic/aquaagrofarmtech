@@ -8,6 +8,7 @@ import axios from "axios";
 import { ApiUrl } from "@/config/ServerConnection";
 import InputField from "@/components/input/InputField";
 import CustomButton from "@/components/button/CustomButton";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignUp = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -34,9 +35,13 @@ const SignUp = () => {
           email: form.email,
           password: form.password,
           fullName: form.fullName,
+          role: "employee"
         });
 
-        router.push("/sign-in");
+        console.log(response.data)
+        await AsyncStorage.setItem("id", response.data.user._id);
+
+        router.replace("/details");
 
         // Alert.alert(response.data.message);
       } catch (error: any) {

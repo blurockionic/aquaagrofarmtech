@@ -1,37 +1,45 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import * as Location from "expo-location";
-import axios from "axios";
-import { ApiUrl } from "@/config/ServerConnection";
 
 
 const Home = () => {
-  const [location, setLocation] = useState<any>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     const fetchUser = async () => {
-      const userData = await AsyncStorage.getItem("user");
-      console.log("User data:", userData);
-      if (userData) {
-        setUser(JSON.parse(userData));
+      try {
+        const userData = await AsyncStorage.getItem("user");
+        if (userData) {
+          setUser(JSON.parse(userData));
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
     fetchUser();
   }, []);
 
-  if (!user) {
-    return <Redirect href="/(auth)/welcome" />;
+  if (loading) {
+    return null; // Render nothing or a loading indicator while determining user state
   }
 
   return (
     <Redirect
-      href={user.role === "admin" ? "/(tabs)/home" : "/(emp-tabs)/home"}
+      href={
+        user?.role === "admin"
+          ? "/(tabs)/home"
+          : user?.role === "employee"
+          ? "/(emp-tabs)/salary"
+          : "/(auth)/sign-in" // Redirect to login if user is null
+      }
     />
   );
 };
 
 export default Home;
+

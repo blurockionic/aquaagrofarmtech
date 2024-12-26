@@ -88,7 +88,7 @@ export const newEmployee = async (req, res) => {
 //endpoint to fetch all the employee
 export const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find().populate("userId");
+    const employees = await Employee.find({}).populate("userId");
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ message: "Failed to retrieve the employees" });

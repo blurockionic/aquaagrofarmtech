@@ -14,7 +14,6 @@ import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import moment from "moment";
-import { red } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = {};
@@ -23,6 +22,7 @@ const Profile = (props: Props) => {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(moment());
   const [employee, setEmployee] = useState<any>({});
+  const [isLoutClicked, setIsLogoutClicked] = useState<boolean>(false);
 
   const getUserData = async () => {
     try {
@@ -45,12 +45,15 @@ const Profile = (props: Props) => {
   }, []);
 
   const logout = async () => {
+    setIsLogoutClicked(true);
     try {
       const response = await axios.get(`${ApiUrl}/auth/logout`);
       await AsyncStorage.removeItem("user");
-      router.push("/(auth)/sign-in");
+      router.replace("/(auth)/sign-in");
     } catch (error) {
       console.error(error);
+    }finally{
+      setIsLogoutClicked(false);
     }
   };
 
@@ -296,7 +299,7 @@ const Profile = (props: Props) => {
           </View> */}
           {/* </View> */}
           <View style={{ marginTop: 50, marginBottom: 100 }}>
-            <Button title="Logout" onPress={() => logout()} color="red" />
+            <Button title={isLoutClicked ? "Logging out..." : "Logout"} disabled={isLoutClicked} onPress={() => logout()} color="red" />
           </View>
         </View>
       </ScrollView>

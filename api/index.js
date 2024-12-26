@@ -11,7 +11,7 @@ import locationRoute from "./routes/location.routes.js";
 import bodyParser from "body-parser";
 
 // Load environment variables
-dotenv.config({ path: process.env.ENV_PATH || "./.env" });
+dotenv.config({ path: "./.env" });
 
 // Initialize Express app
 const app = express();

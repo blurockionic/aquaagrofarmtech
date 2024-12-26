@@ -17,7 +17,7 @@
       "supportsTablet": true,
       "config": {
         "googleMaps": {
-          "apiKey": process.env.GOOGLE_MAPS_API_KEY,
+          "apiKey": ""
         }
       },
       "infoPlist": {
@@ -39,7 +39,7 @@
       "newArchEnabled": true,
       "config": {
         "googleMaps": {
-          "apiKey": process.env.GOOGLE_MAPS_API_KEY,
+          "apiKey": ""
         }
       },
       "package": "com.blurockionic.aaf"

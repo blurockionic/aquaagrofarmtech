@@ -40,21 +40,21 @@ const SignIn = () => {
         await AsyncStorage.setItem("token", response.data.token);
 
         //saveToken
-        await SecureStore.setItemAsync("userToken", response.data.token);
+        // await SecureStore.setItemAsync("userToken", response.data.token);
         // Optionally store the user data
         await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-        await SecureStore.setItemAsync(
-          "user",
-          JSON.stringify(response.data.user)
-        );
+        // await SecureStore.setItemAsync(
+        //   "user",
+        //   JSON.stringify(response.data.user)
+        // );
 
         // You can navigate to the next screen after successful login
         Alert.alert("Success", response.data.message);
 
         if (response.data.user.role === "admin") {
-          router.push("/(tabs)/home");
+          router.replace("/(tabs)/home");
         } else {
-          router.push("/(emp-tabs)/salary");
+          router.replace("/(emp-tabs)/salary");
         }
       } else {
         Alert.alert("Login Failed", response.data.message);

@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import "react-native-reanimated";
+
 
 const Layout = () => {
   return (
@@ -7,6 +7,7 @@ const Layout = () => {
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
       <Stack.Screen name="sign-up" options={{ headerShown: false }} />
       <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+      <Stack.Screen name="details" options={{ headerShown: false }} />
     </Stack>
   );
 };

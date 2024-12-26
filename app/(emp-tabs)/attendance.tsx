@@ -74,9 +74,6 @@ const Attendance = () => {
   const fetchEmployeeDetails = async () => {
     try {
       const response = await axios.get(`${ApiUrl}/employee/${user.id}`);
-
-      console.log(response.data, "hiii");
-
       const employeeData = response.data?.employee || [];
       setEmployees(employeeData);
 
@@ -87,6 +84,8 @@ const Attendance = () => {
       console.error("Error fetching employee details:", error);
     }
   };
+
+ 
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>

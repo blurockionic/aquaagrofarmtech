@@ -28,6 +28,8 @@ const Profile = (props: Props) => {
   const [employee, setEmployee] = useState<any>({});
   const [employeeDetails, setEmployeeDetails] = useState<any>({});
   const [isEditClicked, setIsEditClicked] = useState(false);
+  const [isLogoutClicked, setIsLogoutClicked] = useState<boolean>(false);
+  const [isDeleteClicked, setIsDeleteClicked] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     phone: "",
     designation: "",
@@ -109,12 +111,28 @@ const Profile = (props: Props) => {
   };
 
   const handleLogout = async () => {
+    setIsLogoutClicked(true);
     try {
       const response = await axios.get(`${ApiUrl}/auth/logout`);
       await AsyncStorage.removeItem("user");
-      router.push("/(auth)/sign-in");
+      router.replace("/(auth)/sign-in");
     } catch (error) {
       console.error("Error logging out:", error);
+    }finally{
+      setIsLogoutClicked(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleteClicked(true);
+    try {
+      const response = await axios.delete(`${ApiUrl}/auth/delete/${employee.id}`);
+      await AsyncStorage.removeItem("user");
+      router.replace("/(auth)/sign-up");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    }finally{
+      setIsDeleteClicked(false);
     }
   };
 
@@ -233,7 +251,10 @@ const Profile = (props: Props) => {
 
         {/* Logout Button */}
         <View style={styles.logoutContainer}>
-          <Button title="Logout" onPress={handleLogout} color="red" />
+          <Button title={isLogoutClicked ? "Logging out..." : "Logout"} disabled={isLogoutClicked} onPress={handleLogout} color="red" />
+        </View>
+        <View style={styles.logoutContainer}>
+          <Button title={isDeleteClicked ? "Deleting your account..." : "Delete Account"} disabled={isDeleteClicked} onPress={handleDeleteAccount} color="red" />
         </View>
       </ScrollView>
     </GestureHandlerRootView>
